@@ -113,19 +113,21 @@ public class Optimizer {
 	}
 	public boolean CheckCopy(FullInstruction f) {
 		boolean isOk= true;
-		for(int i=0; i<5; i++) {
-			if(i==f.column1) {
-				continue;
-			}
-			boolean isCopy = true;
-			for(int a=0;a<16;a++) {
-				if(Workspace[a][i]!=Workspace[a][f.column1]) {
-					isCopy=false;
-					break;
+		if(f.instruct!=Instruction.Mov) {
+			for(int i=0; i<5; i++) {
+				if(i==f.column1) {
+					continue;
 				}
-			}
-			if(isCopy) {
-				isOk = false;
+				boolean isCopy = true;
+				for(int a=0;a<16;a++) {
+					if(Workspace[a][i]!=Workspace[a][f.column1]) {
+						isCopy=false;
+						break;
+					}
+				}
+				if(isCopy) {
+					isOk = false;
+				}
 			}
 		}
 		return isOk;
