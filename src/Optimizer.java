@@ -36,8 +36,10 @@ public class Optimizer {
 	    return f;
 	}
 	// ApplyInstruction applies the instruction then checks if the instruction is valid in the current state of the workspace.
-	public void ApplyInstruction(FullInstruction f) {
+	public boolean ApplyInstruction(FullInstruction f) {
 		boolean[] L = new boolean[16];
+		boolean[] N = Negated.clone();
+		int NOM = NumberOfMatch;
 		for(int i =0; i<16;i++) {
 			L[i] = Workspace[i][f.column1];
 			switch(f.instruct) {
@@ -58,8 +60,15 @@ public class Optimizer {
 					break;
 			}
 		}
-
-		return;
+		if(!Check(f)) {
+			NumberOfMatch = NOM;
+			Negated = N;
+			for(int i =0; i<16; i++) {
+				Workspace[i][f.column1]=L[i];
+			}
+			return false;
+		}
+		return true;
 	}
 	public boolean UpdateNumberOfMatch() {
 		int a;
@@ -154,9 +163,61 @@ public class Optimizer {
 		
 	}
 
-	public boolean Check() {
+	public boolean Check(FullInstruction f) {
 		boolean b;
 		b= CheckPermutation();
+		b&=UpdateNegateAndCheck(f);
+		b&=CheckCopy(f);
+		b&=UpdateNumberOfMatch();
 		return b;
+	}
+	
+	public Optimizer Clone() {
+		List<FullInstruction> op = new ArrayList<FullInstruction>();
+		boolean[][] ws = new boolean[16][5];
+		for(int i=0;i<16;i++) {
+			ws[i]=Workspace[i].clone();
+		}
+		for(FullInstruction el : operations) {
+			op.add(el);
+		}
+		Optimizer o = new Optimizer(permutation.clone(),seed);
+		o.operations = op;
+		o.Workspace = ws;
+		o.Negated=Negated.clone();
+		o.NumberOfMatch=NumberOfMatch;
+		return o;
+	}
+	
+	
+	public static void main(String[] args){
+		List<Optimizer> L = new ArrayList<Optimizer>();
+		int[] permutation = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+		int seed = 100;
+		L.add(new Optimizer(permutation,seed));
+		int m =0;
+		while(true) {
+			Optimizer o = L.get(0);
+			L.remove(0);
+			if(o.NumberOfMatch==16) {
+				System.out.print("Solution trouvée en " + o.operations.size() + " opérations");
+				break;
+			}
+			Optimizer save = o.Clone();
+			for(int i=0; i<5;i++){
+				for(int j=0;j<5;j++) {
+					for(int k = 0; k<5;k++) {
+						if(k==j) {break;}
+						if(i==3 & k!=0) {break;}//si l'opération est not
+						if(o.ApplyInstruction(new FullInstruction(i,j,k))) {
+							L.add(o.Clone());
+						}
+						o = save.Clone();
+					}
+				}
+			}
+			m+=1;
+			System.out.print("Etape " + m + " terminée, L est de longueur "+ L.size());
+		}
 	}
 }
