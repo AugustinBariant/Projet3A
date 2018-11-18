@@ -9,7 +9,7 @@ public class Optimizer {
 	public List<FullInstruction> operations;
 	public boolean[][] Workspace = new boolean[16][5];
 	public boolean[] Negated = new boolean[5];
-	public int NumberOfMatch = 0;
+	public int NumberOfMatch;
 	
 	Optimizer(int[] perm, int s) {
 		permutation = perm;
@@ -25,6 +25,7 @@ public class Optimizer {
 		for(int i =0;i<5;i++){
 			Negated[i]=false;
 		}
+		NumberOfMatch=0;
 		UpdateNumberOfMatch();
 	}
 	public FullInstruction GetRandomInstruction() {
@@ -60,19 +61,22 @@ public class Optimizer {
 					break;
 			}
 		}
+		NumberOfMatch = NOM;
+		Negated = N;
+		operations.add(f);
 		if(!Check(f)) {
-			NumberOfMatch = NOM;
-			Negated = N;
-			for(int i =0; i<16; i++) {
-				Workspace[i][f.column1]=L[i];
-			}
+			//for(int i =0; i<16; i++) {
+				//Workspace[i][f.column1]=L[i];
+			//}
 			return false;
 		}
+		
 		return true;
 	}
 	public boolean UpdateNumberOfMatch() {
 		int a;
 		int NbOfMatch = 0;
+
 		for(int i =0; i<16;i++) {
 			a=0;
 			for(int k=0; k<4;k+=1){
@@ -80,11 +84,15 @@ public class Optimizer {
 					a+=(1<<k);
 				}
 			}
+			
+
 			if(a == permutation[i]) {
 				NbOfMatch+=1;
+				
 			}
 		}
 		if(NumberOfMatch>NbOfMatch) {
+			NumberOfMatch = NbOfMatch;
 			return false;
 		}else {
 			NumberOfMatch = NbOfMatch;
@@ -192,23 +200,35 @@ public class Optimizer {
 	
 	public static void main(String[] args){
 		List<Optimizer> L = new ArrayList<Optimizer>();
-		int[] permutation = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+		int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+		int[] permutation2 ={0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
 		int seed = 100;
-		L.add(new Optimizer(permutation,seed));
+		L.add(new Optimizer(permutation2,seed));
 		int m =0;
+		boolean b = false;
+		//debug
+		if(b) {
+			FullInstruction f1 = new FullInstruction(4,4,0);
+			FullInstruction f2 = new FullInstruction(4,0,1);
+			FullInstruction f3 = new FullInstruction(4,1,4);
+			L.get(0).ApplyInstruction(f1);
+			L.get(0).ApplyInstruction(f2);
+			L.get(0).ApplyInstruction(f3);
+			System.out.print(L.get(0).NumberOfMatch);
+		}
 		while(true) {
 			Optimizer o = L.get(0);
 			L.remove(0);
-			if(o.NumberOfMatch==16) {
-				System.out.print("Solution trouvée en " + o.operations.size() + " opérations");
+			if(o.NumberOfMatch==16 || o.operations.size()>4) {
+				System.out.print("\nSolution trouvée en " + o.operations.size() + " opérations");
 				break;
 			}
 			Optimizer save = o.Clone();
 			for(int i=0; i<5;i++){
 				for(int j=0;j<5;j++) {
 					for(int k = 0; k<5;k++) {
-						if(k==j) {break;}
-						if(i==3 & k!=0) {break;}//si l'opération est not
+						if(k==j) {continue;}
+						if((i==3) && (k!=0)) {continue;}//si l'opération est not
 						if(o.ApplyInstruction(new FullInstruction(i,j,k))) {
 							L.add(o.Clone());
 						}
@@ -217,7 +237,8 @@ public class Optimizer {
 				}
 			}
 			m+=1;
-			System.out.print("Etape " + m + " terminée, L est de longueur "+ L.size());
+			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.NumberOfMatch + " matchs");
+			
 		}
 	}
 }
