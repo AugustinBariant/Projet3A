@@ -4,13 +4,14 @@ import java.util.Random;
 
 
 public class Optimizer {
-	public int[] permutation = new int[16];
+	public static int[] permutation = new int[16];
+	public static int[] permutation_lignes = new int[4]; 
 	public int seed ;
 	public List<FullInstruction> operations;
 	public boolean[][] Workspace = new boolean[16][5];
 	public boolean[] Negated = new boolean[5];
 	public int NumberOfMatch;
-	
+	public static int[] return_columns = new int[4];
 	Optimizer(int[] perm, int s) {
 		permutation = perm;
 		seed=s;
@@ -26,7 +27,19 @@ public class Optimizer {
 			Negated[i]=false;
 		}
 		NumberOfMatch=0;
+		InitializePermutation();
 		UpdateNumberOfMatch();
+		
+	}
+	public void InitializePermutation() {
+		for(int k =0; k<4;k++) {
+			permutation_lignes[k]=0;
+			for(int i=0; i<16;i+=1){
+				if((permutation[i]>>k) % 2 == 1) {
+					permutation_lignes[k]+=(1<<i);
+				}
+			}
+		}
 	}
 	public FullInstruction GetRandomInstruction() {
 		Random generator = new Random(seed);
@@ -76,19 +89,27 @@ public class Optimizer {
 	public boolean UpdateNumberOfMatch() {
 		int a;
 		int NbOfMatch = 0;
-
-		for(int i =0; i<16;i++) {
+		List<Integer> s = new ArrayList<Integer>();
+		for(int k =0; k<5;k++) {
 			a=0;
-			for(int k=0; k<4;k+=1){
+			for(int i=0; i<16;i+=1){
 				if(Workspace[i][k]) {
-					a+=(1<<k);
+					a+=(1<<i);
 				}
 			}
-			
-
-			if(a == permutation[i]) {
-				NbOfMatch+=1;
-				
+			for(int j=0;j<4;j++) {
+				if(!s.contains(j)) {
+					if(a==permutation_lignes[j]) {
+						s.add(j);
+						break;
+					}
+				}
+			}
+		}
+		NbOfMatch = s.size();
+		if(NbOfMatch==4) {
+			for(int j=0;j<4;j++) {
+				return_columns[j]=s.indexOf(j);
 			}
 		}
 		if(NumberOfMatch>NbOfMatch) {
@@ -201,9 +222,10 @@ public class Optimizer {
 	public static void main(String[] args){
 		List<Optimizer> L = new ArrayList<Optimizer>();
 		int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-		int[] permutation2 ={0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
+		int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
+		int[] permutation3 ={0,2,1,3,8,10,9,11,4,6,5,7,12,14,13,15};
 		int seed = 100;
-		L.add(new Optimizer(permutation2,seed));
+		L.add(new Optimizer(permutation3,seed));
 		int m =0;
 		boolean b = false;
 		//debug
@@ -219,8 +241,13 @@ public class Optimizer {
 		while(true) {
 			Optimizer o = L.get(0);
 			L.remove(0);
-			if(o.NumberOfMatch==16 || o.operations.size()>4) {
-				System.out.print("\nSolution trouvée en " + o.operations.size() + " opérations");
+			if(o.NumberOfMatch==4 || o.operations.size()==2) {
+				System.out.print("\nSolution trouvée en " + o.operations.size() + " opérations\n");
+				int i =0;
+				for(FullInstruction el:o.operations) {
+					i+=1;
+					System.out.print("Instruction "+  i+ " : " + Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
+				}
 				break;
 			}
 			Optimizer save = o.Clone();
