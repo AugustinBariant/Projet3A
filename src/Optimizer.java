@@ -251,17 +251,13 @@ public class Optimizer {
 				break;
 			}
 			Optimizer save = o.Clone();
-			for(int i=0; i<5;i++){
-				for(int j=0;j<5;j++) {
-					for(int k = 0; k<5;k++) {
-						if(k==j) {continue;}
-						if((i==3) && (k!=0)) {continue;}//si l'opération est not
-						if(o.ApplyInstruction(new FullInstruction(i,j,k))) {
-							L.add(o.Clone());
-						}
-						o = save.Clone();
-					}
+			InstructionCycle cycle = new InstructionCycle();
+			FullInstruction i = cycle.NewInstruction();
+			while(i.isOk) {
+				if(save.ApplyInstruction(i)) {
+					L.add(save);
 				}
+				i = cycle.NewInstruction();
 			}
 			m+=1;
 			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.NumberOfMatch + " matchs");
