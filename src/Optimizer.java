@@ -12,6 +12,10 @@ public class Optimizer {
 	public boolean[] Negated = new boolean[5];
 	public int NumberOfMatch;
 	public static int[] return_columns = new int[4];
+	public boolean[] Read = new boolean[5];
+	Optimizer(int s) {
+		s =seed;
+	}
 	Optimizer(int[] perm, int s) {
 		permutation = perm;
 		seed=s;
@@ -27,6 +31,10 @@ public class Optimizer {
 			Negated[i]=false;
 		}
 		NumberOfMatch=0;
+		for(int i=0;i<4;i++) {
+			Read[i]=false;
+		}
+		Read[4]=true;
 		InitializePermutation();
 		UpdateNumberOfMatch();
 		
@@ -51,11 +59,10 @@ public class Optimizer {
 	}
 	// ApplyInstruction applies the instruction then checks if the instruction is valid in the current state of the workspace.
 	public boolean ApplyInstruction(FullInstruction f) {
-		boolean[] L = new boolean[16];
-		boolean[] N = Negated.clone();
-		int NOM = NumberOfMatch;
+		boolean[] L1 = new boolean[16];
+		boolean[] L2 = new boolean[16];
 		for(int i =0; i<16;i++) {
-			L[i] = Workspace[i][f.column1];
+			L1[i] = Workspace[i][f.column1];
 			switch(f.instruct) {
 				case And:
 					Workspace[i][f.column1]&=Workspace[i][f.column2];
@@ -73,11 +80,10 @@ public class Optimizer {
 					Workspace[i][f.column1]=Workspace[i][f.column2];
 					break;
 			}
+			L2[i] = Workspace[i][f.column1];
 		}
-		NumberOfMatch = NOM;
-		Negated = N;
 		operations.add(f);
-		if(!Check(f)) {
+		if(!Check(f,L1,L2)) {
 			//for(int i =0; i<16; i++) {
 				//Workspace[i][f.column1]=L[i];
 			//}
@@ -191,13 +197,51 @@ public class Optimizer {
 		return isOk;
 		
 	}
-
-	public boolean Check(FullInstruction f) {
+	public boolean UpdateAndCheckRead(FullInstruction f) {
+		boolean isOk = true;
+		switch(f.instruct) {
+			case Not:
+				Read[f.column1]=false;
+				break;
+			default:
+				if(!Read[f.column1]) {
+					isOk = false;
+				}
+				Read[f.column1]=false;
+				Read[f.column2]=true;
+				break;	
+		}
+		return isOk;
+	}
+	public boolean CheckEqual(boolean[] L1, boolean[] L2) {
+		boolean b = true;
+		for(int i=0;i<L1.length;i++) {
+			b&=(L1[i]==L2[i]);
+		}
+		return !b;
+	}
+	public boolean CheckTrueFalse(boolean[] L1) {
+		boolean b = true;
+		boolean c = true;
+		int i=0;
+		while((b||c)&&i<16) {
+			b&=(L1[i]==true);
+			c&=(L1[i]==false);
+			i+=1;
+		}
+		return (!b)&&(!c);
+	}
+	
+	public boolean Check(FullInstruction f, boolean[] L1, boolean[] L2) {
 		boolean b;
+		
 		b= CheckPermutation();
 		b&=UpdateNegateAndCheck(f);
 		b&=CheckCopy(f);
 		b&=UpdateNumberOfMatch();
+		b&=UpdateAndCheckRead(f);
+		b&=CheckEqual(L1,L2);
+		b&=CheckTrueFalse(L2);
 		return b;
 	}
 	
@@ -210,7 +254,8 @@ public class Optimizer {
 		for(FullInstruction el : operations) {
 			op.add(el);
 		}
-		Optimizer o = new Optimizer(permutation.clone(),seed);
+		Optimizer o = new Optimizer(seed);
+		o.Read = Read.clone();
 		o.operations = op;
 		o.Workspace = ws;
 		o.Negated=Negated.clone();
@@ -218,46 +263,72 @@ public class Optimizer {
 		return o;
 	}
 	
+	public void PrintCurrentState() {
+		System.out.print("Current Workspace : \n");
+		for(int i =0;i<5;i++) {
+			System.out.print("[");
+			for(int j=0;j<15;j++) {
+				System.out.print((Workspace[j][i]?1:0) +" ,");
+			}
+			System.out.print((Workspace[15][i]?1:0) +" ]\n");
+			
+		}
+	}
 	
 	public static void main(String[] args){
 		List<Optimizer> L = new ArrayList<Optimizer>();
 		int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 		int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
-		int[] permutation3 ={0,2,1,3,8,10,9,11,4,6,5,7,12,14,13,15};
+		int[] permutation3 ={0,1,3,2,5,4,7,6,9,8,11,10,13,12,15,14};
+		int[] s2 = {8,6,7,9,3,12,10,15,13,1,14,4,0,11,5,2};
+
 		int seed = 100;
 		L.add(new Optimizer(permutation3,seed));
 		int m =0;
 		boolean b = false;
+		boolean c = true;
 		//debug
 		if(b) {
 			FullInstruction f1 = new FullInstruction(4,4,0);
 			FullInstruction f2 = new FullInstruction(4,0,1);
 			FullInstruction f3 = new FullInstruction(4,1,4);
+			System.out.print(L.get(0).Clone().ApplyInstruction(f1));
 			L.get(0).ApplyInstruction(f1);
-			L.get(0).ApplyInstruction(f2);
-			L.get(0).ApplyInstruction(f3);
-			System.out.print(L.get(0).NumberOfMatch);
+			//L.get(0).ApplyInstruction(f2);
+			//L.get(0).ApplyInstruction(f3);
+			//System.out.print(L.get(0).NumberOfMatch);
 		}
-		while(true) {
+		
+		while(c) {
+			if(L.isEmpty()) {
+				System.out.print("Liste Vide");
+				break;
+			}
 			Optimizer o = L.get(0);
 			L.remove(0);
-			if(o.NumberOfMatch==4 || o.operations.size()==2) {
+			if(o.NumberOfMatch==4 || o.operations.size()==10) {
 				System.out.print("\nSolution trouvée en " + o.operations.size() + " opérations\n");
 				int i =0;
 				for(FullInstruction el:o.operations) {
 					i+=1;
-					System.out.print("Instruction "+  i+ " : " + Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
+					System.out.print("Instruction "+  i+ " : " + el.StringToPrint());
 				}
 				break;
 			}
-			Optimizer save = o.Clone();
+			
 			InstructionCycle cycle = new InstructionCycle();
-			FullInstruction i = cycle.NewInstruction();
-			while(i.isOk) {
+			FullInstruction i = cycle.UpdateNewInstruction();
+			o.PrintCurrentState();
+			while(i.isEnd) {
+				Optimizer save = o.Clone();
+				FullInstruction el = i;
+				
+				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
 				if(save.ApplyInstruction(i)) {
+					System.out.print("added instrct :" + i.StringToPrint());
 					L.add(save);
 				}
-				i = cycle.NewInstruction();
+				i = cycle.UpdateNewInstruction();
 			}
 			m+=1;
 			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.NumberOfMatch + " matchs");

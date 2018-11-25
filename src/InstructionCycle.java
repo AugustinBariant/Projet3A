@@ -12,7 +12,7 @@ public class InstructionCycle {
 		is_first_try=false;
 	}
 	public FullInstruction NewInstruction() {
-		if(k==j) {return UpdateNewInstruction();}
+		if(k==j && i!=3) {return UpdateNewInstruction();}
 		if((i==3) && (k!=0)) {return UpdateNewInstruction();}//si l'opération est not
 		return new FullInstruction(i,j,k);
 	}
