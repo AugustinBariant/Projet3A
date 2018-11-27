@@ -1,9 +1,11 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.TreeSet;
 
 
 public class Optimizer {
+	public static TreeSet<WorkspaceComparator> tree;
 	public static int[] permutation = new int[16];
 	public static int[] permutation_lignes = new int[4]; 
 	public int seed ;
@@ -35,6 +37,7 @@ public class Optimizer {
 			Read[i]=false;
 		}
 		Read[4]=true;
+		tree = new TreeSet<WorkspaceComparator>();
 		InitializePermutation();
 		UpdateNumberOfMatch();
 		
@@ -231,6 +234,25 @@ public class Optimizer {
 		}
 		return (!b)&&(!c);
 	}
+	public boolean CheckAndUpdateTree() {
+		int[] L = new int[5];
+		for(int k =0; k<5;k++) {
+			L[k]=0;
+			for(int i=0; i<16;i+=1){
+				if(Workspace[i][k]) {
+					L[k]+=(1<<i);
+				}
+			}
+			//System.out.print(L[k]+"\n");
+		}
+		WorkspaceComparator t = new WorkspaceComparator(L);
+		if(tree.contains(t)) {
+			return false;
+		}
+		tree.add(t);
+		return true;
+		
+	}
 	
 	public boolean Check(FullInstruction f, boolean[] L1, boolean[] L2) {
 		boolean b;
@@ -242,6 +264,12 @@ public class Optimizer {
 		b&=UpdateAndCheckRead(f);
 		b&=CheckEqual(L1,L2);
 		b&=CheckTrueFalse(L2);
+		if(b) {
+			b&=CheckAndUpdateTree();
+			if(!b) {
+				//System.out.print("Not added instrct :" + f.StringToPrint());
+			}
+		}
 		return b;
 	}
 	
@@ -262,7 +290,7 @@ public class Optimizer {
 		o.NumberOfMatch=NumberOfMatch;
 		return o;
 	}
-	
+
 	public void PrintCurrentState() {
 		System.out.print("Current Workspace : \n");
 		for(int i =0;i<5;i++) {
@@ -279,7 +307,7 @@ public class Optimizer {
 		List<Optimizer> L = new ArrayList<Optimizer>();
 		int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 		int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
-		int[] permutation3 ={0,1,3,2,5,4,7,6,9,8,11,10,13,12,15,14};
+		int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
 		int[] s2 = {8,6,7,9,3,12,10,15,13,1,14,4,0,11,5,2};
 
 		int seed = 100;
@@ -318,20 +346,20 @@ public class Optimizer {
 			
 			InstructionCycle cycle = new InstructionCycle();
 			FullInstruction i = cycle.UpdateNewInstruction();
-			o.PrintCurrentState();
+			//o.PrintCurrentState();
 			while(i.isEnd) {
 				Optimizer save = o.Clone();
 				FullInstruction el = i;
 				
 				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
 				if(save.ApplyInstruction(i)) {
-					System.out.print("added instrct :" + i.StringToPrint());
+					//System.out.print("added instrct :" + i.StringToPrint());
 					L.add(save);
 				}
 				i = cycle.UpdateNewInstruction();
 			}
 			m+=1;
-			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.NumberOfMatch + " matchs");
+			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.NumberOfMatch + " matchs\n tree est de longueur "+Optimizer.tree.size()+"\n");
 			
 		}
 	}
