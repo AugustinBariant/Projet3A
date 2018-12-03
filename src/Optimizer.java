@@ -2,10 +2,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.TreeSet;
+import java.util.HashSet;
 
 
 public class Optimizer {
-	public static TreeSet<WorkspaceComparator> tree;
+	public static HashSet<WorkspaceComparator> tree;
 	public static int[] permutation = new int[16];
 	public static int[] permutation_lignes = new int[4]; 
 	public int seed ;
@@ -37,7 +38,7 @@ public class Optimizer {
 			Read[i]=false;
 		}
 		Read[4]=true;
-		tree = new TreeSet<WorkspaceComparator>();
+		tree = new HashSet<WorkspaceComparator>();
 		InitializePermutation();
 		UpdateNumberOfMatch();
 		
