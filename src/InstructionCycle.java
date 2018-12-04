@@ -4,22 +4,22 @@ public class InstructionCycle {
 	public int i;
 	public int j;
 	public int k;
-	public boolean is_first_try;
+	public boolean isFirstTry;
 	InstructionCycle(){
 		i=0;
 		j=0;
 		k=0;
-		is_first_try=false;
+		isFirstTry=false;
 	}
-	public FullInstruction NewInstruction() {
-		if(k==j && i!=3) {return UpdateNewInstruction();}
-		if((i==3) && (k!=0)) {return UpdateNewInstruction();}//si l'opération est not
+	public FullInstruction newInstruction() {
+		if(k==j && i!=3) {return updateNewInstruction();}
+		if((i==3) && (k!=0)) {return updateNewInstruction();}//si l'opération est not
 		return new FullInstruction(i,j,k);
 	}
-	public FullInstruction UpdateNewInstruction() {
-		if(is_first_try) {
-			is_first_try=false;
-			return NewInstruction();
+	public FullInstruction updateNewInstruction() {
+		if(isFirstTry) {
+			isFirstTry=false;
+			return newInstruction();
 		}
 		if(k==4 && j==4 && i==4) {
 			return new FullInstruction(false);
@@ -36,7 +36,7 @@ public class InstructionCycle {
 				j=0;
 			}
 		}
-		return NewInstruction();
+		return newInstruction();
 	}
 	
 }

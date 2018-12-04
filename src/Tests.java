@@ -11,7 +11,7 @@ class Tests {
 	
 	@Test
 	public void searchIdentity() {
-		Optimizer o = new Optimizer(0); // XXX: bogus object creation
+		Optimizer o = new Optimizer(); // XXX: bogus object creation
 		List<FullInstruction> obtained = o.search(permutation);
 		List<FullInstruction> expected = new ArrayList<>(); // XXX: write here the desired output
 
@@ -20,7 +20,7 @@ class Tests {
 
 	@Test
 	public void searchPermutation2() {
-	    Optimizer o = new Optimizer(0); // XXX: bogus object creation
+	    Optimizer o = new Optimizer(); // XXX: bogus object creation
 		List<FullInstruction> obtained = o.search(permutation2);
 		List<FullInstruction> expected = new ArrayList<>(); // XXX: write here the desired output
 

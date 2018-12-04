@@ -60,14 +60,14 @@ public class FullInstruction {
 		this.isEnd=true;
 		return;
 	}
-	public String StringToPrint() {
+	public String stringToPrint() {
 		String s;
-		switch(instruct.Id){
+		switch(instruct.id){
 		case 3:
-			s=Instruction.instr_names[instruct.Id] + "(" + column1 + ")\n";
+			s=Instruction.instr_names[instruct.id] + "(" + column1 + ")\n";
 			break;
 		default:
-			s=Instruction.instr_names[instruct.Id] + "(" + column1 + "," + column2 +")\n";
+			s=Instruction.instr_names[instruct.id] + "(" + column1 + "," + column2 +")\n";
 			break;
 		}
 		return s;

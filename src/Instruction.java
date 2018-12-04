@@ -8,9 +8,9 @@ public enum Instruction {
 	static String[] instr_names = {"And","Or","Xor","Not","Mov"};
 	
 	public int requiredColumns = 0;
-	public int Id = 0;
+	public int id = 0;
 	Instruction(int i, int r){
-		this.Id = i;
+		this.id = i;
 		this.requiredColumns = r;		
 	}
 	
