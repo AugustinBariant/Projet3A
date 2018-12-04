@@ -304,6 +304,11 @@ public class Optimizer {
 		}
 	}
 	
+	public List<FullInstruction> search(int[] permutation) {
+		// TODO
+		return null;
+	}
+	
 	public static void main(String[] args){
 		List<Optimizer> L = new ArrayList<Optimizer>();
 		int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
@@ -336,7 +341,7 @@ public class Optimizer {
 			Optimizer o = L.get(0);
 			L.remove(0);
 			if(o.NumberOfMatch==4 || o.operations.size()==10) {
-				System.out.print("\nSolution trouvée en " + o.operations.size() + " opérations\n");
+				System.out.print("\nSolution trouvï¿½e en " + o.operations.size() + " opï¿½rations\n");
 				int i =0;
 				for(FullInstruction el:o.operations) {
 					i+=1;
@@ -360,7 +365,7 @@ public class Optimizer {
 				i = cycle.UpdateNewInstruction();
 			}
 			m+=1;
-			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.NumberOfMatch + " matchs\n tree est de longueur "+Optimizer.tree.size()+"\n");
+			System.out.print("\nEtape " + m + " terminï¿½e, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opï¿½rations, avec " + o.NumberOfMatch + " matchs\n tree est de longueur "+Optimizer.tree.size()+"\n");
 			
 		}
 	}
