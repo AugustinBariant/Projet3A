@@ -3,10 +3,9 @@ import java.util.Comparator;
 import java.util.List;
 
 public class WorkspaceKey {
-	List<Integer> tree;
+	List<Integer> tree = new ArrayList<Integer>();
 
 	WorkspaceKey(int i1, int i2, int i3, int i4, int i5) {
-		tree = new ArrayList<Integer>();
 		tree.add(i1);
 		tree.add(i2);
 		tree.add(i3);
@@ -16,7 +15,6 @@ public class WorkspaceKey {
 	}
 
 	WorkspaceKey(int[] L) {
-		tree = new ArrayList<Integer>();
 		for (int i = 0; i < L.length; i++) {
 			tree.add(L[i]);
 		}
