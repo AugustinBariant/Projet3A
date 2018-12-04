@@ -161,7 +161,7 @@ public class Optimizer {
 	}
 	public boolean CheckCopy(FullInstruction f) {
 		boolean isOk= true;
-		if(f.instruct!=Instruction.Mov) {
+		if(f.instruct!=InstructionEnum.Mov) {
 			for(int i=0; i<5; i++) {
 				if(i==f.column1) {
 					continue;

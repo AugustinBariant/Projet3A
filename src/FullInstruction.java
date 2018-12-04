@@ -1,6 +1,6 @@
 
 public class FullInstruction {
-	public Instruction instruct;
+	public InstructionEnum instruct;
 	public int column1;
 	public int column2;
 	public boolean isEnd;
@@ -11,19 +11,19 @@ public class FullInstruction {
 	FullInstruction(int i, int c1, int c2){
 		switch(i){
 			case 0:
-				instruct = Instruction.And;
+				instruct = InstructionEnum.And;
 				break;
 			case 1:
-				instruct = Instruction.Or;
+				instruct = InstructionEnum.Or;
 				break;
 			case 2:
-				instruct = Instruction.Xor;
+				instruct = InstructionEnum.Xor;
 				break;
 			case 3:
-				instruct = Instruction.Not;
+				instruct = InstructionEnum.Not;
 				break;
 			case 4:
-				instruct = Instruction.Mov;
+				instruct = InstructionEnum.Mov;
 				break;
 			default: 
 				System.out.print("Invalid Instruction Id");
@@ -36,19 +36,19 @@ public class FullInstruction {
 	FullInstruction(int i, int c1){
 		switch(i){
 			case 0:
-				instruct = Instruction.And;
+				instruct = InstructionEnum.And;
 				break;
 			case 1:
-				instruct = Instruction.Or;
+				instruct = InstructionEnum.Or;
 				break;
 			case 2:
-				instruct = Instruction.Xor;
+				instruct = InstructionEnum.Xor;
 				break;
 			case 3:
-				instruct = Instruction.Not;
+				instruct = InstructionEnum.Not;
 				break;
 			case 4:
-				instruct = Instruction.Mov;
+				instruct = InstructionEnum.Mov;
 				break;
 			default: 
 				System.out.print("Invalid Instruction Id");
@@ -64,10 +64,10 @@ public class FullInstruction {
 		String s;
 		switch(instruct.Id){
 		case 3:
-			s=Instruction.instr_names[instruct.Id] + "(" + column1 + ")\n";
+			s=InstructionEnum.instr_names[instruct.Id] + "(" + column1 + ")\n";
 			break;
 		default:
-			s=Instruction.instr_names[instruct.Id] + "(" + column1 + "," + column2 +")\n";
+			s=InstructionEnum.instr_names[instruct.Id] + "(" + column1 + "," + column2 +")\n";
 			break;
 		}
 		return s;

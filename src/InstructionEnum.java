@@ -1,5 +1,5 @@
 
-public enum Instruction {
+public enum InstructionEnum {
 	And(0,2),
 	Or(1,2),
 	Xor(2,2),
@@ -9,7 +9,7 @@ public enum Instruction {
 	
 	public int requiredColumns = 0;
 	public int Id = 0;
-	Instruction(int i, int r){
+	InstructionEnum(int i, int r){
 		this.Id = i;
 		this.requiredColumns = r;		
 	}
