@@ -22,7 +22,7 @@ public class InstructionCycle {
 			return newInstruction();
 		}
 		if(k==4 && j==4 && i==4) {
-			return new FullInstruction(false);
+			return new FullInstruction(true);
 		}
 		if(k!=4) {
 			k+=1;

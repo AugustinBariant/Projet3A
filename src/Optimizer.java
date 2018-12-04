@@ -324,7 +324,7 @@ public class Optimizer {
 			InstructionCycle cycle = new InstructionCycle();
 			FullInstruction i = cycle.updateNewInstruction();
 			//o.PrintCurrentState();
-			while(i.isEnd) {
+			while(!i.isEnd) {
 				Optimizer save = o.Clone();
 				FullInstruction el = i;
 				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");

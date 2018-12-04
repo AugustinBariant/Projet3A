@@ -31,7 +31,7 @@ public class FullInstruction {
 		}		
 		this.column1 = c1;
 		this.column2 = c2;
-		this.isEnd=true;
+		this.isEnd=false;
 	}
 	FullInstruction(int i, int c1){
 		switch(i){
@@ -57,7 +57,7 @@ public class FullInstruction {
 			
 				
 		this.column1 = c1;
-		this.isEnd=true;
+		this.isEnd=false;
 		return;
 	}
 	public String stringToPrint() {
