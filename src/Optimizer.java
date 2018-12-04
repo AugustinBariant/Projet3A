@@ -6,7 +6,7 @@ import java.util.HashSet;
 
 
 public class Optimizer {
-	public static HashSet<WorkspaceComparator> tree;
+	public static HashSet<WorkspaceKey> tree;
 	public static int[] permutation = new int[16];
 	public static int[] permutation_lignes = new int[4]; 
 	public int seed ;
@@ -38,7 +38,7 @@ public class Optimizer {
 			Read[i]=false;
 		}
 		Read[4]=true;
-		tree = new HashSet<WorkspaceComparator>();
+		tree = new HashSet<WorkspaceKey>();
 		InitializePermutation();
 		UpdateNumberOfMatch();
 		
@@ -246,7 +246,7 @@ public class Optimizer {
 			}
 			//System.out.print(L[k]+"\n");
 		}
-		WorkspaceComparator t = new WorkspaceComparator(L);
+		WorkspaceKey t = new WorkspaceKey(L);
 		if(tree.contains(t)) {
 			return false;
 		}
