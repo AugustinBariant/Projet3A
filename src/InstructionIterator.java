@@ -1,29 +1,22 @@
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 
-public class InstructionIterator implements Iterator<Instruction> {
+public class InstructionIterator implements Iterable<Instruction> {
 
-	List<Iterator<Instruction>> instructionIterator = new ArrayList<Iterator<Instruction>>(
-			Arrays.asList(new AndIterator(), new OrIterator(), new XOrIterator(), new NotIterator()));
-	ListIterator<Iterator<Instruction>> instructions = instructionIterator.listIterator();
-	Iterator<Instruction> currentInstruction = instructions.next();
+	private final Operator op;
+	
+	InstructionIterator(Operator op){
+		this.op = op;
+	}
 	
 	@Override
-	public boolean hasNext() {
-		return instructions.hasNext() || currentInstruction.hasNext();
-	}
-
-	@Override
-	public Instruction next() {
-		if (currentInstruction.hasNext()) {
-			return currentInstruction.next();
+	public Iterator<Instruction> iterator() {
+		if (op.arity() == 1) {
+			return (new UnaryIterator(op)).iterator();
+		} else if (op.arity() == 2) {
+			return (new BinaryIterator(op)).iterator();
 		} else {
-			currentInstruction = instructions.next();
-			return next();
+			throw new IllegalArgumentException("Invalid arity");
 		}
-	}
-
+	} 
+	
 }

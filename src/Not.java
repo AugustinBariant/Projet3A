@@ -1,40 +1,15 @@
-import java.util.Iterator;
-
-public class Not implements Instruction {
-	final Register reg;
-
-	Not(Register r1) {
-		this.reg = r1;
+public class Not implements Operator {
+	public int arity() {
+		return 1;
 	}
-
-	@Override
-	public boolean run(boolean[] in) {
-		return !in[0];
+	public boolean run(boolean b[]) {
+		assert(b.length == 1);
+		return ! b[0];
 	}
-
-	@Override
+	public boolean isMove() {
+		return false;
+	}
 	public boolean isNegate() {
 		return true;
 	}
-
-	public Iterator<Instruction> iterator() {
-		return new NotIterator();
-	}
-
-}
-
-class NotIterator implements Iterator<Instruction> {
-
-	Iterator<Register> regs = Register.iterator();
-
-	@Override
-	public boolean hasNext() {
-		return regs.hasNext();
-	}
-
-	@Override
-	public Instruction next() {
-		return new Not(regs.next());
-	}
-
 }

@@ -1,5 +1,6 @@
-public interface Instruction extends Iterable<Instruction> {
+public interface Instruction {
 	String toString();
-	boolean run(boolean[] in);
+	void run(boolean[] in);
+	boolean isMove();
 	boolean isNegate();
 }

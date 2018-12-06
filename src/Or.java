@@ -1,56 +1,15 @@
-import java.util.Iterator;
-
-public class Or implements Instruction {
-	final Register src, dst;
-
-	Or(Register r1, Register r2) {
-		this.src = r1;
-		this.dst = r2;
+public class Or implements Operator {
+	public int arity() {
+		return 2;
 	}
-
-	@Override
-	public boolean run(boolean[] in) {
-		return in[0] || in[1];
+	public boolean run(boolean b[]) {
+		assert(b.length == 2);
+		return b[0] || b[1];
 	}
-
-	@Override
+	public boolean isMove() {
+		return false;
+	}
 	public boolean isNegate() {
 		return false;
 	}
-
-	public Iterator<Instruction> iterator() {
-		return new AndIterator();
-	}
-
-}
-
-class OrIterator implements Iterator<Instruction> {
-
-	Iterator<Register> srcs = Register.iterator();
-	Iterator<Register> dsts = Register.iterator();
-	Register currentDst = dsts.next();
-
-	@Override
-	public boolean hasNext() {
-		return srcs.hasNext() || dsts.hasNext();
-	}
-
-	@Override
-	public Instruction next() {
-		// Cartesian product of srcs and dsts
-		// excluding the diagonal (in which case it would be a NOP)
-		if (srcs.hasNext()) {
-			Register currentSrc = srcs.next();
-			if (currentSrc.equals(currentDst)) {
-				return next();
-			} else {
-				return new Or(currentSrc, currentDst);
-			}
-		} else {
-			srcs = Register.iterator();
-			currentDst = dsts.next();
-			return next();
-		}
-	}
-
 }
