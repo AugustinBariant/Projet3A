@@ -1,17 +1,17 @@
 
 public class InstructionCycle {
 
-	public int i;
-	public int j;
-	public int k;
-	public boolean isFirstTry;
+	private int i;
+	private int j;
+	private int k;
+	private boolean isFirstTry;
 	InstructionCycle(){
 		i=0;
 		j=0;
 		k=0;
 		isFirstTry=false;
 	}
-	public FullInstruction newInstruction() {
+	private FullInstruction newInstruction() {
 		if(k==j && i!=3) {return updateNewInstruction();}
 		if((i==3) && (k!=0)) {return updateNewInstruction();}//si l'opération est not
 		return new FullInstruction(i,j,k);
