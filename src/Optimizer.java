@@ -4,10 +4,10 @@ import java.util.HashSet;
 
 
 public class Optimizer {
-	private static HashSet<WorkspaceKey> tree;
+	public static HashSet<WorkspaceKey> tree;
 	private static int[] permutation = new int[16];
 	private static int[] permutationLines = new int[4]; 
-	private List<FullInstruction> operations;
+	public List<FullInstruction> operations;
 	private boolean[][] workspace = new boolean[16][5];
 	private boolean[] negated = new boolean[5];
 	public int numberOfMatch;
@@ -339,7 +339,8 @@ public class Optimizer {
 		//int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
 		int[] s2 = {8,6,7,9,3,12,10,15,13,1,14,4,0,11,5,2};
-		Optimizer.search(s2);
+		OptimizerSolver oS = new OptimizerSolver(s2);
+		oS.solve();
 
 	}
 }

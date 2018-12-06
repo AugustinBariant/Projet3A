@@ -1,4 +1,3 @@
-
 public class FullInstruction {
 	public Instruction instruct;
 	public int column1;
