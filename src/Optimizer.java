@@ -270,7 +270,7 @@ public class Optimizer {
 		}
 		return b;
 	}
-	public Optimizer Clone() {
+	public Optimizer copy() {
 		List<FullInstruction> op = new ArrayList<FullInstruction>();
 		boolean[][] ws = new boolean[16][5];
 		for(int i=0;i<16;i++) {
@@ -325,7 +325,7 @@ public class Optimizer {
 			FullInstruction i = cycle.updateNewInstruction();
 			//o.PrintCurrentState();
 			while(!i.isEnd) {
-				Optimizer save = o.Clone();
+				Optimizer save = o.copy();
 				FullInstruction el = i;
 				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
 				if(save.applyInstruction(i)) {
