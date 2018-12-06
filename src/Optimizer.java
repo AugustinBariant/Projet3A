@@ -294,45 +294,6 @@ public class Optimizer {
 		}
 	}
 	
-	public static List<FullInstruction> search(int[] permutation) {
-		List<Optimizer> L = new ArrayList<Optimizer>();
-		L.add(new Optimizer(permutation));
-		int m=0;
-		while(true) {
-			if(L.isEmpty()) {
-				System.out.print("Liste Vide");
-				break;
-			}
-			Optimizer o = L.get(0);
-			L.remove(0);
-			if(o.numberOfMatch==4 || o.operations.size()==10) {
-				System.out.print("\nSolution trouvée en " + o.operations.size() + " opérations\n");
-				int i =0;
-				for(FullInstruction el:o.operations) {
-					i+=1;
-					System.out.print("Instruction "+  i+ " : " + el.stringToPrint());
-				}
-				break;
-			}
-			
-			InstructionCycle cycle = new InstructionCycle();
-			FullInstruction i = cycle.updateNewInstruction();
-			//o.PrintCurrentState();
-			while(!i.isEnd) {
-				Optimizer save = o.copy();
-				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
-				if(save.applyInstruction(i)) {
-					//System.out.print("added instrct :" + i.StringToPrint());
-					L.add(save);
-				}
-				i = cycle.updateNewInstruction();
-			}
-			m+=1;
-			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.numberOfMatch + " matchs\n tree est de longueur "+Optimizer.tree.size()+"\n");
-			
-		}
-		return null;
-	}
 	
 	public static void main(String[] args){
 		//int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
