@@ -1,20 +1,18 @@
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.TreeSet;
 import java.util.HashSet;
 
 
 public class Optimizer {
-	public static HashSet<WorkspaceKey> tree;
-	public static int[] permutation = new int[16];
-	public static int[] permutationLines = new int[4]; 
-	public List<FullInstruction> operations;
-	public boolean[][] workspace = new boolean[16][5];
-	public boolean[] negated = new boolean[5];
+	private static HashSet<WorkspaceKey> tree;
+	private static int[] permutation = new int[16];
+	private static int[] permutationLines = new int[4]; 
+	private List<FullInstruction> operations;
+	private boolean[][] workspace = new boolean[16][5];
+	private boolean[] negated = new boolean[5];
 	public int numberOfMatch;
-	public static int[] returnColumns = new int[4];
-	public boolean[] read = new boolean[5];
+	private static int[] returnColumns = new int[4];
+	private boolean[] read = new boolean[5];
 	Optimizer() {
 	}
 	Optimizer(int[] perm) {
@@ -37,10 +35,14 @@ public class Optimizer {
 		read[4]=true;
 		tree = new HashSet<WorkspaceKey>();
 		initializePermutation();
-		updateNumberOfMatch();
+		try {
+			updateNumberOfMatch();
+		}catch(Exception e) {
+			
+		}
 		
 	}
-	public void initializePermutation() {
+	private void initializePermutation() {
 		for(int k =0; k<4;k++) {
 			permutationLines[k]=0;
 			for(int i=0; i<16;i+=1){
@@ -49,14 +51,6 @@ public class Optimizer {
 				}
 			}
 		}
-	}
-	public FullInstruction getRandomInstruction() {
-		Random generator = new Random();
-	    int id = (int) generator.nextDouble() * 5;
-	    int c1 = (int) generator.nextDouble() * 5;
-	    int c2 = (int) generator.nextDouble() * 5;
-	    FullInstruction f = new FullInstruction(id,c1,c2);
-	    return f;
 	}
 	// ApplyInstruction applies the instruction then checks if the instruction is valid in the current state of the workspace.
 	public boolean applyInstruction(FullInstruction f) {
@@ -93,7 +87,7 @@ public class Optimizer {
 		
 		return true;
 	}
-	public boolean updateNumberOfMatch() {
+	private void updateNumberOfMatch() throws Exception {
 		int a;
 		int NbOfMatch = 0;
 		List<Integer> s = new ArrayList<Integer>();
@@ -121,14 +115,13 @@ public class Optimizer {
 		}
 		if(numberOfMatch>NbOfMatch) {
 			numberOfMatch = NbOfMatch;
-			return false;
+			throw new Exception();
 		}else {
 			numberOfMatch = NbOfMatch;
-			return true;
+			return;
 		}
 	}
-	public boolean updateNegateAndCheck(FullInstruction f) {
-		boolean isOk = true;
+	private void updateNegateAndCheck(FullInstruction f) throws Exception {
 		switch(f.instruct) {
 			case And:
 				negated[f.column1]=false;
@@ -144,7 +137,7 @@ public class Optimizer {
 				break;
 			case Not:
 				if(negated[f.column1]) {
-					isOk=false;
+					throw new Exception();
 				}else {
 					negated[f.column1]=true;
 				}
@@ -154,10 +147,9 @@ public class Optimizer {
 				negated[f.column2]=false;
 				break;	
 		}
-		return isOk;
+		return;
 	}
-	public boolean checkCopy(FullInstruction f) {
-		boolean isOk= true;
+	private void checkCopy(FullInstruction f) throws Exception {
 		if(f.instruct!=Instruction.Mov) {
 			for(int i=0; i<5; i++) {
 				if(i==f.column1) {
@@ -171,13 +163,13 @@ public class Optimizer {
 					}
 				}
 				if(isCopy) {
-					isOk = false;
+					throw new Exception();
 				}
 			}
 		}
-		return isOk;
+		return;
 	}
-	public boolean checkPermutation() {
+	private void checkPermutation() throws Exception{
 		int[] L = new int[32];
 		int a;
 		for(int i =0; i<16;i++) {
@@ -189,39 +181,40 @@ public class Optimizer {
 			}
 			L[a]+=1;
 		}
-		boolean isOk = true;
 		for(int i =0; i<32;i++) {
 			if(L[i]>1) {
-				isOk=false;
+				throw new Exception();
 			}
 		}
-		return isOk;
+		return;
 		
 	}
-	public boolean updateAndCheckRead(FullInstruction f) {
-		boolean isOk = true;
+	private void updateAndCheckRead(FullInstruction f) throws Exception{
 		switch(f.instruct) {
 			case Not:
 				read[f.column1]=false;
 				break;
 			default:
 				if(!read[f.column1]) {
-					isOk = false;
+					throw new Exception();
 				}
 				read[f.column1]=false;
 				read[f.column2]=true;
 				break;	
 		}
-		return isOk;
+		return;
 	}
-	public boolean checkEqual(boolean[] L1, boolean[] L2) {
+	private void checkEqual(boolean[] L1, boolean[] L2) throws Exception{
 		boolean b = true;
 		for(int i=0;i<L1.length;i++) {
 			b&=(L1[i]==L2[i]);
 		}
-		return !b;
+		if(b) {
+			throw new Exception();
+		}
+		return;
 	}
-	public boolean checkTrueFalse(boolean[] L1) {
+	private void checkTrueFalse(boolean[] L1) throws Exception{
 		boolean b = true;
 		boolean c = true;
 		int i=0;
@@ -230,9 +223,12 @@ public class Optimizer {
 			c&=(L1[i]==false);
 			i+=1;
 		}
-		return (!b)&&(!c);
+		if(b||c) {
+			throw new Exception();
+		}
+		return;
 	}
-	public boolean checkAndUpdateTree() {
+	private void checkAndUpdateTree() throws Exception{
 		int[] L = new int[5];
 		for(int k =0; k<5;k++) {
 			L[k]=0;
@@ -245,30 +241,28 @@ public class Optimizer {
 		}
 		WorkspaceKey t = new WorkspaceKey(L);
 		if(tree.contains(t)) {
-			return false;
+			throw new Exception();
 		}
 		tree.add(t);
-		return true;
+		return ;
 		
 	}
 	
 	public boolean check(FullInstruction f, boolean[] L1, boolean[] L2) {
-		boolean b;
-		
-		b= checkPermutation();
-		b&=updateNegateAndCheck(f);
-		b&=checkCopy(f);
-		b&=updateNumberOfMatch();
-		b&=updateAndCheckRead(f);
-		b&=checkEqual(L1,L2);
-		b&=checkTrueFalse(L2);
-		if(b) {
-			b&=checkAndUpdateTree();
-			if(!b) {
-				//System.out.print("Not added instrct :" + f.StringToPrint());
-			}
+		try {
+			checkPermutation();
+			updateNegateAndCheck(f);
+			checkCopy(f);
+			updateNumberOfMatch();
+			updateAndCheckRead(f);
+			checkEqual(L1,L2);
+			checkTrueFalse(L2);
+			checkAndUpdateTree();
+			return true ;
+		}catch(Exception e) {
+			return false;
 		}
-		return b;
+		
 	}
 	public Optimizer copy() {
 		List<FullInstruction> op = new ArrayList<FullInstruction>();
@@ -326,7 +320,6 @@ public class Optimizer {
 			//o.PrintCurrentState();
 			while(!i.isEnd) {
 				Optimizer save = o.copy();
-				FullInstruction el = i;
 				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
 				if(save.applyInstruction(i)) {
 					//System.out.print("added instrct :" + i.StringToPrint());
@@ -342,9 +335,9 @@ public class Optimizer {
 	}
 	
 	public static void main(String[] args){
-		int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-		int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
-		int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
+		//int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+		//int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
+		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
 		int[] s2 = {8,6,7,9,3,12,10,15,13,1,14,4,0,11,5,2};
 		Optimizer.search(s2);
 
