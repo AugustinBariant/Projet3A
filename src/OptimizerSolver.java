@@ -12,7 +12,7 @@ public class OptimizerSolver {
 		finalOptimizer = null;
 	}
 	
-	public List<FullInstruction> solve(){
+	public Optimizer solve(){
 		L.add(new Optimizer(permutation));
 		int m=0;
 		while(true) {
@@ -50,7 +50,7 @@ public class OptimizerSolver {
 			
 		}
 		if(finalOptimizer!=null) {
-			return finalOptimizer.operations;
+			return finalOptimizer;
 		}else {
 			return null;
 		}
