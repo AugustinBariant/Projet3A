@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
-
+import java.sql.Timestamp;
 
 public class Optimizer {
 	public static HashSet<WorkspaceKey> tree;
@@ -91,6 +91,7 @@ public class Optimizer {
 		int a;
 		int NbOfMatch = 0;
 		List<Integer> s = new ArrayList<Integer>();
+		int[] returnCols = new int[4];
 		for(int k =0; k<5;k++) {
 			a=0;
 			for(int i=0; i<16;i+=1){
@@ -102,6 +103,7 @@ public class Optimizer {
 				if(!s.contains(j)) {
 					if(a==permutationLines[j]) {
 						s.add(j);
+						returnCols[j]=k;
 						break;
 					}
 				}
@@ -109,12 +111,9 @@ public class Optimizer {
 		}
 		NbOfMatch = s.size();
 		if(NbOfMatch==4) {
-			for(int j=0;j<4;j++) {
-				returnColumns[j]=s.indexOf(j);
-			}
+			returnColumns = returnCols;
 		}
 		if(numberOfMatch>NbOfMatch) {
-			numberOfMatch = NbOfMatch;
 			throw new Exception();
 		}else {
 			numberOfMatch = NbOfMatch;
@@ -248,7 +247,7 @@ public class Optimizer {
 		
 	}
 	
-	public boolean check(FullInstruction f, boolean[] L1, boolean[] L2) {
+	private boolean check(FullInstruction f, boolean[] L1, boolean[] L2) {
 		try {
 			checkPermutation();
 			updateNegateAndCheck(f);
@@ -294,14 +293,38 @@ public class Optimizer {
 		}
 	}
 	
+	public int[] getPermutation() {
+		int[] tab = new int[16];
+		for(int i =0;i<16;i++) {
+			for(int k=0;k<4;k++) {
+				if(workspace[i][returnColumns[k]]) {
+					tab[i]+=(1<<k);
+				}
+			}
+			
+		}
+		return tab;
+	}
 	
 	public static void main(String[] args){
-		//int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-		//int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
+		Timestamp ts = Timestamp.from(java.time.Clock.systemUTC().instant());
+		int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+		int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,13,14,15};
+		int[] s2 = {8, 6, 7, 9, 3, 12, 10, 15, 13, 1, 14, 4, 0, 11, 5, 2};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
-		int[] s2 = {8,6,7,9,3,12,10,15,13,1,14,4,0,11,5,2};
-		OptimizerSolver oS = new OptimizerSolver(s2);
-		oS.solve();
+		OptimizerSolver o = new OptimizerSolver(permutation2); // XXX: bogus object creation
+		Optimizer obtainedOptimizer = o.solve();
+		int[] obtained = obtainedOptimizer.getPermutation();
+		for(int i=0;i<16;i++) {
+			System.out.print(obtained[i]+" ");
+		}
+		System.out.print("\n");
+		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
+		long diff = ts2.getTime()-ts.getTime();
+		System.out.print("\n Time: "+diff+" ms");
+		
+		int[] expected = permutation;// XXX: write here the desired output
 
 	}
+	
 }

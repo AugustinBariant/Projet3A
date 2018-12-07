@@ -17,7 +17,7 @@ class Tests {
 	static int[] permutation = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 	static int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
 	
-	private int[] invert(int[] t) {
+	private static int[] invert(int[] t) {
 		int[] a = new int[16];
 		for(int i=0;i<16;i++) {
 			a[t[i]]=i;
@@ -35,12 +35,22 @@ class Tests {
 	}
 
 	@Test
-	public void searchPermutation0() {
-	    OptimizerSolver o = new OptimizerSolver(s0); // XXX: bogus object creation
-		Optimizer obtained = o.solve();
-		List<FullInstruction> expected = new ArrayList<>(); // XXX: write here the desired output
+	public void searchPermutation2() {
+	    OptimizerSolver o = new OptimizerSolver(s2); // XXX: bogus object creation
+		Optimizer obtainedOptimizer = o.solve();
+		int[] obtained = obtainedOptimizer.getPermutation();
+		int[] expected = s2;// XXX: write here the desired output
 
 		assertEquals(expected, obtained, "permutation2");
 	}
 	
+	
+	public void searchSmallPermutation() {
+	    OptimizerSolver o = new OptimizerSolver(permutation); // XXX: bogus object creation
+		Optimizer obtainedOptimizer = o.solve();
+		int[] obtained = obtainedOptimizer.getPermutation();
+		int[] expected = permutation;// XXX: write here the desired output
+
+		assertEquals(expected, obtained, "permutation2");
+	}
 }
