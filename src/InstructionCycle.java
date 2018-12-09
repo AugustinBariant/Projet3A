@@ -5,11 +5,13 @@ public class InstructionCycle {
 	private int j;
 	private int k;
 	private boolean isFirstTry;
-	InstructionCycle(){
+	private int cardinalityLog;
+	InstructionCycle(int cardLog){
 		i=0;
 		j=0;
 		k=0;
 		isFirstTry=false;
+		cardinalityLog = cardLog;
 	}
 	private FullInstruction newInstruction() {
 		if(k==j && i!=3) {return updateNewInstruction();}
@@ -21,13 +23,13 @@ public class InstructionCycle {
 			isFirstTry=false;
 			return newInstruction();
 		}
-		if(k==4 && j==4 && i==4) {
+		if(k==cardinalityLog && j==cardinalityLog && i==4) {
 			return new FullInstruction(true);
 		}
-		if(k!=4) {
+		if(k!=cardinalityLog) {
 			k+=1;
 		}else {
-			if(j!=4) {
+			if(j!=cardinalityLog) {
 				j+=1;
 				k=0;
 			}else {

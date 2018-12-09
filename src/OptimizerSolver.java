@@ -5,15 +5,17 @@ public class OptimizerSolver {
 	private List<Optimizer> L;
 	private int[] permutation;
 	private Optimizer finalOptimizer;
+	private int cardinalityLog;
 	
-	OptimizerSolver(int[] p){
+	OptimizerSolver(int[] p, int cardLog){
 		permutation = p;
 		L = new ArrayList<Optimizer>();
 		finalOptimizer = null;
+		cardinalityLog = cardLog;
 	}
 	
 	public Optimizer solve(){
-		L.add(new Optimizer(permutation));
+		L.add(new Optimizer(permutation,cardinalityLog));
 		int m=0;
 		while(true) {
 			if(L.isEmpty()) {
@@ -23,7 +25,7 @@ public class OptimizerSolver {
 			Optimizer o = L.get(0);
 			L.remove(o);
 			
-			InstructionCycle cycle = new InstructionCycle();
+			InstructionCycle cycle = new InstructionCycle(cardinalityLog);
 			FullInstruction i = cycle.updateNewInstruction();
 			//o.PrintCurrentState();
 			while(!i.isEnd) {
@@ -31,7 +33,7 @@ public class OptimizerSolver {
 				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
 				if(save.applyInstruction(i)) {
 					//System.out.print("added instrct :" + i.StringToPrint());
-					if(save.numberOfMatch==4) {
+					if(save.numberOfMatch==cardinalityLog) {
 						System.out.print("\nSolution trouvée en " + save.operations.size() + " opérations\n");
 						int k =0;
 						for(FullInstruction el:save.operations) {

@@ -36,7 +36,7 @@ class Tests {
 
 	@Test
 	public void searchPermutation2() {
-	    OptimizerSolver o = new OptimizerSolver(s2); // XXX: bogus object creation
+	    OptimizerSolver o = new OptimizerSolver(s2,4); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
 		int[] expected = s2;// XXX: write here the desired output
@@ -46,7 +46,7 @@ class Tests {
 	
 	
 	public void searchSmallPermutation() {
-	    OptimizerSolver o = new OptimizerSolver(permutation); // XXX: bogus object creation
+	    OptimizerSolver o = new OptimizerSolver(permutation,4); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
 		int[] expected = permutation;// XXX: write here the desired output
