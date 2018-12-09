@@ -10,7 +10,7 @@ public class Optimizer {
 	public List<FullInstruction> operations;
 	private boolean[][] workspace = new boolean[16][5];
 	private boolean[] negated = new boolean[5];
-	public int numberOfMatch;
+	public static int numberOfMatch;
 	private static int[] returnColumns = new int[4];
 	private boolean[] read = new boolean[5];
 	Optimizer() {
@@ -142,8 +142,7 @@ public class Optimizer {
 				}
 				break;
 			case Mov:
-				negated[f.column1]=false;
-				negated[f.column2]=false;
+				negated[f.column1]=negated[f.column2];
 				break;	
 		}
 		return;
@@ -168,6 +167,7 @@ public class Optimizer {
 		}
 		return;
 	}
+	// Checks if every line is different
 	private void checkPermutation() throws Exception{
 		int[] L = new int[32];
 		int a;
@@ -178,25 +178,28 @@ public class Optimizer {
 					a+=(1<<k);
 				}
 			}
-			L[a]+=1;
-		}
-		for(int i =0; i<32;i++) {
-			if(L[i]>1) {
+			if(L[a]>=1) {
 				throw new Exception();
+			}else {
+				L[a]+=1;
 			}
 		}
 		return;
 		
 	}
+	
 	private void updateAndCheckRead(FullInstruction f) throws Exception{
 		switch(f.instruct) {
 			case Not:
-				read[f.column1]=false;
 				break;
-			default:
+			case Mov:
 				if(!read[f.column1]) {
 					throw new Exception();
 				}
+				read[f.column1]=false;
+				read[f.column2]=true;
+				break;
+			default:
 				read[f.column1]=false;
 				read[f.column2]=true;
 				break;	
@@ -204,22 +207,21 @@ public class Optimizer {
 		return;
 	}
 	private void checkEqual(boolean[] L1, boolean[] L2) throws Exception{
-		boolean b = true;
 		for(int i=0;i<L1.length;i++) {
-			b&=(L1[i]==L2[i]);
+			if(L1[i]!=L2[i]) {
+				return;
+			}
 		}
-		if(b) {
-			throw new Exception();
-		}
-		return;
+		throw new Exception();
 	}
+	// Check if the new line is either entirely true or entirely false
 	private void checkTrueFalse(boolean[] L1) throws Exception{
 		boolean b = true;
 		boolean c = true;
 		int i=0;
 		while((b||c)&&i<16) {
-			b&=(L1[i]==true);
-			c&=(L1[i]==false);
+			b&=L1[i];
+			c&=!L1[i];
 			i+=1;
 		}
 		if(b||c) {
@@ -312,7 +314,7 @@ public class Optimizer {
 		int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,13,14,15};
 		int[] s2 = {8, 6, 7, 9, 3, 12, 10, 15, 13, 1, 14, 4, 0, 11, 5, 2};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
-		OptimizerSolver o = new OptimizerSolver(permutation2); // XXX: bogus object creation
+		OptimizerSolver o = new OptimizerSolver(s2); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
 		for(int i=0;i<16;i++) {
