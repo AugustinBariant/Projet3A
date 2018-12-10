@@ -40,18 +40,18 @@ public class OptimizerSolver {
 							k+=1;
 							System.out.print("Instruction "+  k+ " : " + el.stringToPrint());
 						}
-						finalOptimizer = save;
+						finalOptimizer = save; 
 						break;
 					}
 					L.add(save);
 				}
 				i = cycle.updateNewInstruction();
 			}
-			m+=1;
-			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.numberOfMatch + " matchs\n tree est de longueur "+Optimizer.tree.size()+"\n");
 			if(finalOptimizer!=null) {
 				break;
 			}
+			m+=1;
+			System.out.print("\nEtape " + m + " terminée, L est de longueur "+ L.size() + ", il y a " + o.operations.size() + " opérations, avec " + o.numberOfMatch + " matchs\n tree est de longueur "+Optimizer.tree.size()+"\n");
 		}
 		if(finalOptimizer!=null) {
 			return finalOptimizer;

@@ -8,11 +8,13 @@ public class Optimizer {
 	private static int cardinalityLog;
 	private static int[] permutation = new int[1<<cardinalityLog];
 	private static int[] permutationLines; 
+	public static int numberOfMatch;
+	private static int numberOfOperation;
+	private static int[] returnColumns = new int[cardinalityLog+1];
+	private static int postPoningCycles=3;
 	public List<FullInstruction> operations;
 	private boolean[][] workspace;
 	private boolean[] negated;
-	public int numberOfMatch;
-	private static int[] returnColumns = new int[cardinalityLog+1];
 	private boolean[] read;
 	
 	
@@ -123,12 +125,29 @@ public class Optimizer {
 		if(NbOfMatch==cardinalityLog) {
 			returnColumns = returnCols;
 		}
-		if(numberOfMatch>NbOfMatch) {
-			throw new Exception();
+		if(numberOfOperation+postPoningCycles<=operations.size()+1) {
+			if(numberOfMatch>NbOfMatch) {
+				throw new Exception();
+			}else {
+				if(numberOfMatch==NbOfMatch) {
+					return;
+				}
+				numberOfOperation = operations.size()+1;
+				numberOfMatch = NbOfMatch;
+				return;
+			}
 		}else {
-			numberOfMatch = NbOfMatch;
+			if(numberOfMatch<NbOfMatch) {
+				numberOfOperation = operations.size()+1;
+				numberOfMatch = NbOfMatch;
+				return;
+			}
+			if(numberOfMatch-1>NbOfMatch) {
+				throw new Exception();
+			}
 			return;
 		}
+		
 	}
 	private void updateNegateAndCheck(FullInstruction f) throws Exception {
 		switch(f.instruct) {
@@ -165,7 +184,7 @@ public class Optimizer {
 				}
 				boolean isCopy = true;
 				for(int a=0;a<(1<<cardinalityLog);a++) {
-					if(workspace[a][i]!=workspace[a][f.column1]) {
+					if(workspace[a][i]^workspace[a][f.column1]) {
 						isCopy=false;
 						break;
 					}
@@ -207,7 +226,7 @@ public class Optimizer {
 					throw new Exception();
 				}
 				read[f.column1]=false;
-				read[f.column2]=true;
+				read[f.column2]=false;
 				break;
 			default:
 				read[f.column1]=false;
@@ -289,7 +308,7 @@ public class Optimizer {
 		o.operations = op;
 		o.workspace = ws;
 		o.negated=negated.clone();
-		o.numberOfMatch=numberOfMatch;
+		//o.numberOfMatch=numberOfMatch;
 		return o;
 	}
 
@@ -323,15 +342,22 @@ public class Optimizer {
 		int[] permutation = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 		int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,13,14,15};
 		int[] s2 = {8, 6, 7, 9, 3, 12, 10, 15, 13, 1, 14, 4, 0, 11, 5, 2};
-		int[] cardinality = {3,1,0,2,7,5,6,4};
+		int[] s1 = {15, 12, 2, 7, 9, 0, 5, 10, 1, 11, 14, 8, 6, 13, 3, 4};
+		int[] cardinality = {4,3,6,5,0,1,7,2};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
+		
+		
 		OptimizerSolver o = new OptimizerSolver(cardinality,3); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
+		
+		
 		for(int i=0;i<(1<<cardinalityLog);i++) {
 			System.out.print(obtained[i]+" ");
 		}
 		System.out.print("\n");
+		
+		
 		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
 		long diff = ts2.getTime()-ts.getTime();
 		System.out.print("\n Time: "+diff+" ms");
