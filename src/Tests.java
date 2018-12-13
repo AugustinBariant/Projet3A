@@ -1,5 +1,6 @@
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ class Tests {
 	static int[] s7 = {1, 13, 15, 0, 14, 8, 2, 11, 7, 4, 12, 10, 9, 3, 5, 6};
 	static int[] permutation = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 	static int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,14,13,15};
+	static int[][] Serpent = {s0,s1,s2,s3,s4,s5,s6,s7,invert(s1),invert(s2),invert(s3),invert(s4),invert(s5),invert(s6),invert(s7)};
 	
 	private static int[] invert(int[] t) {
 		int[] a = new int[16];
@@ -25,32 +27,22 @@ class Tests {
 		return a;
 	}
 	
-	@Test
-	public void searchIdentity() {
-		Optimizer o = new Optimizer(); // XXX: bogus object creation
-		//List<FullInstruction> obtained = o.search(permutation);
-		List<FullInstruction> expected = new ArrayList<>(); // XXX: write here the desired output
-
-		//assertEquals(expected, obtained, "identity permutation");
+	public void printTime(Timestamp ts) {
+		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
+		long diff = ts2.getTime()-ts.getTime();
+		System.out.print("\n Time: "+diff+" ms");
 	}
-
+	
 	@Test
-	public void searchPermutation2() {
-	    OptimizerSolver o = new OptimizerSolver(s2,4); // XXX: bogus object creation
+	public void searchPermutation(int i) {
+		Timestamp ts = Timestamp.from(java.time.Clock.systemUTC().instant());
+		OptimizerSolver o = new OptimizerSolver(Serpent[i],4);
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
-		int[] expected = s2;// XXX: write here the desired output
-
-		assertEquals(expected, obtained, "permutation2");
+		int[] expected = Serpent[i];// XXX: write here the desired output	
+		printTime(ts);
+		assertEquals(expected, obtained, "permutation "+i);
 	}
 	
 	
-	public void searchSmallPermutation() {
-	    OptimizerSolver o = new OptimizerSolver(permutation,4); // XXX: bogus object creation
-		Optimizer obtainedOptimizer = o.solve();
-		int[] obtained = obtainedOptimizer.getPermutation();
-		int[] expected = permutation;// XXX: write here the desired output
-
-		assertEquals(expected, obtained, "permutation2");
-	}
 }

@@ -352,12 +352,6 @@ public class Optimizer {
 		int[] obtained = obtainedOptimizer.getPermutation();
 		
 		
-		for(int i=0;i<(1<<cardinalityLog);i++) {
-			System.out.print(obtained[i]+" ");
-		}
-		System.out.print("\n");
-		
-		
 		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
 		long diff = ts2.getTime()-ts.getTime();
 		System.out.print("\n Time: "+diff+" ms");
