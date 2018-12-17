@@ -25,7 +25,7 @@
 
 \bigbreak
 
-Serpent est un algorithme de chiffrement par block présenté au concours AES en 1997. Il arrivera en finale et obtiendra la deuxième place, derrière Rijndael. Serpent utilise des $\mathrm{S}$-boxes dans son chiffrement et son déchiffrement. Les $\mathrm{S}$-boxes sont des permutations de 4 bits (ie des permutations de $S_{16}$), avec différentes propriétés de chiffrement que nous n'allons pas aborder dans ce rapport. Le projet s'articule autour de l'optimisation de calcul de $\mathrm{S}$-boxes. 
+Serpent est un algorithme de chiffrement par block présenté au concours AES en 1997. Il arrivera en finale et obtiendra la deuxième place, derrière Rijndael. Serpent utilise des $\mathrm{S}$-boxes dans son chiffrement et son déchiffrement. Les $\mathrm{S}$-boxes sont des permutations de 4 bits (\textit{ie.} des permutations de $S_{16}$), avec différentes propriétés de chiffrement que nous n'allons pas aborder dans ce rapport. Le projet s'articule autour de l'optimisation du calcul de $\mathrm{S}$-boxes. 
 
 
 \section{L'approche de l'optimisation}
@@ -59,11 +59,6 @@ Maintenant, on peut écrire l'entrée et la sortie de $S_{2}$ en binaire.
 \hline
 \multicolumn{1}{|l|}{ $x_{0}$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}	\\
 \hline
-\end{tabular}
-
-\smallskip
-
-\begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}
 \hline
 \multicolumn{1}{|l|}{$s_{3}$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $1$}&	\multicolumn{1}{|l|}{ $0$}&	\multicolumn{1}{|l|}{ $0$}	\\
 \hline
@@ -78,11 +73,11 @@ Maintenant, on peut écrire l'entrée et la sortie de $S_{2}$ en binaire.
 \end{center}
 \medbreak
 
-Chaque colonne du tableau contient une représentation binaire de l'entier en entrée et de l'entier en sortie. $x_{0}$, $x_{1}$, $x_{2}$ et $x_{3}$ représentent l'entier $x$ en entrée. De la même manière, $s_{0}$ correspond au bit le moins significatif de $S_{2}(x)$, $s_{1}$ à son deuxième bit le moins significatif etc...
+Chaque colonne du tableau contient une représentation binaire de l'entier en entrée et de l'entier en sortie. $x_{0}$, $x_{1}$, $x_{2}$ et $x_{3}$ représentent l'entier $x = \sum_{i=0}^{3} x_{i} 2^{i}$ en entrée. De la même manière, on a $S_2(x) = \sum_{i=0}^{3} s_{i} 2^{i}$.
 
 \subsection{Définition des opérations réalisables}
 
-On suppose que l'on possède 5 registres $r_{0}$, . . . , $r_{4}$, disponibles pour nos calculs, et quatre d'entre eux contiennent initialement les 4 bits d'entrée ($r_{i}$ contient $x_{i}, 0\leq i\leq 3$). $r_{4}$ est initialisé à 0. On a donc cet état initial:
+On suppose que l'on dispose de 5 registres $r_{0}$, \ldots, $r_{4}$, disponibles pour nos calculs, et quatre d'entre eux contiennent initialement les 4 bits d'entrée ($r_{i}$ contient $x_{i}, 0\leq i\leq 3$). $r_{4}$ est initialisé à 0. On a donc cet état initial:
 
 \medbreak
 \begin{center}
@@ -103,21 +98,29 @@ On suppose que l'on possède 5 registres $r_{0}$, . . . , $r_{4}$, disponibles p
 \medbreak
  Si l'on arrive à effectuer des opérations sur les lignes, et que l'on retombe à la fin sur  les lignes $s_{0}$ à $s_{3}$, alors effectuer ces opérations sur un entier entre $0$ et $15$ revient à appliquer $S_{2}$ à cet entier. 
 Voici la liste des instructions x86 utilisables pour les S-boxes:
-\medbreak
+
+
+\newcommand{\XOR}{\mathtt{xor}\:}
+\newcommand{\OR}{\mathtt{or}\:}
+\newcommand{\MOV}{\mathtt{mov}\:}
+\newcommand{\AND}{\mathtt{and}\:}
+\newcommand{\NOT}{\mathtt{not}\:}
+
+
 \begin{center}
 \begin{tabular}{|l|l|l|}
 \hline
 \multicolumn{1}{|l|}{Instruction}&	\multicolumn{1}{|l|}{Effet}&	\multicolumn{1}{|l|}{Expression}	\\
 \hline
-\multicolumn{1}{|l|}{{\it and a}, $b$}&	\multicolumn{1}{|l|}{ $a:=a\cdot b$}&	\multicolumn{1}{|l|}{ $\mathrm{a}$ \&=b}	\\
+\multicolumn{1}{|l|}{$\AND a, b$}&	\multicolumn{1}{|l|}{ $a:=a\cdot b$}&	\multicolumn{1}{|l|}{ $\mathrm{a}$ \&=b}	\\
 \hline
-\multicolumn{1}{|l|}{{\it or} $a,b$}&	\multicolumn{1}{|l|}{ $a:=a+b$}&	\multicolumn{1}{|l|}{ $\mathrm{a}\ |=\mathrm{b}$}	\\
+\multicolumn{1}{|l|}{$\OR a, b$}&	\multicolumn{1}{|l|}{ $a:=a+b$}&	\multicolumn{1}{|l|}{ $\mathrm{a}\ |=\mathrm{b}$}	\\
 \hline
-\multicolumn{1}{|l|}{{\it xor} $a,b$}&	\multicolumn{1}{|l|}{ $a:=a\oplus b$}&	\multicolumn{1}{|l|}{ $\mathrm{a}\ \wedge=\mathrm{b}$}	\\
+\multicolumn{1}{|l|}{$\XOR a, b$}&	\multicolumn{1}{|l|}{ $a:=a\oplus b$}&	\multicolumn{1}{|l|}{ $\mathrm{a}\ \wedge=\mathrm{b}$}	\\
 \hline
-\multicolumn{1}{|l|}{{\it not a}}&	\multicolumn{1}{|l|}{$a:=a\oplus 1$}&	\multicolumn{1}{|l|}{ $\mathrm{a}=\ \sim \mathrm{a}$}	\\
+\multicolumn{1}{|l|}{$\NOT a$}&	\multicolumn{1}{|l|}{$a:=a\oplus 1$}&	\multicolumn{1}{|l|}{ $\mathrm{a}=\ \sim \mathrm{a}$}	\\
 \hline
-\multicolumn{1}{|l|}{{\it mov} $a, b$}&	\multicolumn{1}{|l|}{ $a:=b$}&	\multicolumn{1}{|l|}{ $\mathrm{a}=\mathrm{b}$}	\\
+\multicolumn{1}{|l|}{$\MOV a, b$}&	\multicolumn{1}{|l|}{ $a:=b$}&	\multicolumn{1}{|l|}{ $\mathrm{a}=\mathrm{b}$}	\\
 \hline
 \end{tabular}
 \end{center}
@@ -142,9 +145,20 @@ Par exemple, on peut exécuter deux instructions $r_{4} := r_{0}$; $r_{0} :=r_{0
 \end{center}
 \medbreak
 
-Puis exécuter la série d'instruction suivante nous amène au resultat : 
+Puis exécuter la série d'instruction suivante nous amène au résultat souhaité : 
+%
+\[
+\begin{array}{ll}
+\XOR r0, r3; & \XOR r2, r1; \\
+\XOR r2, r0; & \OR r3, r4;  \\
+\XOR r3, r1; & \XOR r4, r2; \\
+\MOV r1, r3; & \OR r3, r4; \\
+\XOR r3, r0; & \AND r0, r1; \\
+\XOR r4, r0; & \XOR r1, r3; \\
+\XOR r1, r4; & \NOT r4;
+\end{array}
+\]
 
-xor r0, r3; xor r2, r1; xor r2, r0; or r3, r4; xor r3, r1; xor r4, r2; mov r1, r3; or r3, r4; xor r3, r0; and r0, r1; xor r4, r0; xor r1, r3; xor r1, r4; not r4;
 \medbreak
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}
@@ -169,11 +183,11 @@ On a donc réussi à retrouver notre S-box $S_{2}$ avec une séquence de 16 inst
 
 L'objectif de ce projet est d'implémenter un algorithme qui prend en paramètre une permutation $P$ de $S_{16}$ et qui détermine la plus petite séquence d'instruction qui, appliquée aux 5 registres initiaux, donne $P$. Le processeur pouvant avoir plusieurs cœurs, il faut aussi trouver des séquences d'instructions permettant le parallélisme qui donnent le même résultat. Pour l'instant, nous n'avons pas abordé ce sujet.
        
-Supposons que nous voulions retrouver une permutation $P$ donnée en paramètre. L'algorithme fonctionne par Brute-Force. Nous allons appliquer toutes les séquences d'instructions possibles aux registres initiaux, à la recherche de lignes égales à celles de la permutation $P$. On parcourt donc l'arbre des séquences d'instructions possibles en largeur tant que l'on ne trouve pas de solutions. En ce qui concerne le parallélisme, deux instructions peuvent être lancées en parallèle si aucune d'entre elles ne lit une ligne modifiée par l'autre instruction.
+Supposons que nous voulions retrouver une permutation $P$ donnée en paramètre. L'algorithme fonctionne par force brute. Nous allons appliquer toutes les séquences d'instructions possibles aux registres initiaux, à la recherche de lignes égales à celles de la permutation $P$. On parcourt donc l'arbre des séquences d'instructions possibles en largeur tant que l'on ne trouve pas de solutions. En ce qui concerne le parallélisme, deux instructions peuvent être lancées en parallèle si aucune d'entre elles ne lit une ligne modifiée par l'autre instruction.
 
 \subsection{Problèmes rencontrés}
 
-Cette recherche exhaustive des solutions possède bien évidemment une complexité exponentielle. De plus, à chaque étape, il faut tester pas moins de $5$ instructions différentes possibles, appliquées à $2$ registres qu'il faut choisir parmi les $5$ possibles (sauf pour le Not, où il suffit de choisir un seul registre). Cela fait donc $4*20+5=85$ instructions à tester. Sans introduire de conditions sur les instructions à appliquer, la complexité est bien trop élevée pour pouvoir retourner des solutions aux différentes S-boxes de Serpent.
+Cette recherche exhaustive des solutions possède bien évidemment une complexité exponentielle. De plus, à chaque étape, il faut tester pas moins de $5$ instructions différentes possibles, appliquées à $2$ registres qu'il faut choisir parmi les $5$ possibles (sauf pour le $\NOT\!$, où il suffit de choisir un seul registre). Cela fait donc $4 \times 20+5=85$ instructions à tester. Sans introduire de conditions sur les instructions à appliquer, la complexité est bien trop élevée pour pouvoir retourner des solutions aux différentes S-boxes de Serpent.
 \medbreak
 Naturellement, il va donc falloir exclure certaines séquences d'instructions lors du parcours en profondeur. Voici les principales conditions imposées aux instructions pendant la recherche:
 \medbreak
@@ -181,16 +195,16 @@ Naturellement, il va donc falloir exclure certaines séquences d'instructions lo
 \setlength\itemsep{1em}
 \item La recherche s'arrête lorsque les registres ne peuvent plus générer une permutation, autrement dit si deux colonnes sont égales.
 
-\item A chaque étape, on stocke dans un HashSet l'ensemble des configurations déjà obtenues, et si l'on retombe sur une configuration du HashSet, on arrête la récursion.
+\item À chaque étape, on stocke dans un HashSet l'ensemble des configurations déjà obtenues, et si l'on retombe sur une configuration du HashSet, on arrête la récursion.
 
-\item Aucune instruction autre que Mov n'a le droit d'écrire dans un registre le contenu d'un autre registre.
+\item On s'assure que seule l'instruction $\MOV\!$ peut transférer le contenu d'un registre dans un autre sans changement.
 
-\item Les registres non encore lus ne peuvent pas être modifiés par l'instruction Mov.
+\item Les registres non encore lus ne peuvent pas être dupliqués par l'instruction $\MOV\!$.
 
 \item Une instruction ne peut modifier un registre ni en une ligne de 0, ni en une ligne de 1.
-\item Les registres qui ont été affecté par l'instruction Not portent un flag. Ils ne peuvent pas être réinversés par l'instruction Not.
+\item Les registres qui ont été affectés par l'instruction $\NOT\!$ ne peuvent être sujet à une autre négation (qui aurait pour effet de laisser le registre inchangé).
 
-\item Les instructions n'utilisent que 5 registres.
+\item Les instructions ne peuvent utiliser que 5 registres.
 
 \item La récursion requiert un nombre croissant de registres égaux aux lignes de la permutation en paramètre (représentée sous forme binaire).
 
@@ -199,16 +213,16 @@ Naturellement, il va donc falloir exclure certaines séquences d'instructions lo
 
 \medbreak
 
-Ce dernier point est le moins évident à gérer. Dans notre état courant des choses, l'algorithme fonctionne en théorie (testé sur des permutations nécessitant des séquences d'instructions de longueur abordable) mais est trop long pour trouver des séquences pour les S-boxes. Une autre solution consiste à augmenter le nombre requis de registres en commun avec la permutation dès qu'au moins une séquence d'instruction l'a atteint. Dans ce cas, cela raccourcit la recherche, et en vingt minutes, on trouve une solution pour $S_2$. Cette séquence d'instruction est de longueur $20$, ce qui n'est pas satisfaisant car ce n'est pas la plus courte séquence d'instruction possible. En effet, on ne fait plus une recherche exhaustive, puisque l'on supprime toutes les configurations qui n'obtiennent pas  en un nombre minimal d'étape leur premier registre en commun avec la permutation, par exemple. On pourrait établir cette solution en autorisant un retard de 1-2 instructions pour atteindre chaque palier. Même dans ces cas, l'algorithme actuel est trop long.
+Ce dernier point est le moins évident à gérer. Dans l'état actuel, l'algorithme fonctionne sur des permutations nécessitant des séquences d'instructions de longueur abordable mais est trop lent pour trouver des séquences pour les S-boxes. Une autre solution consisterait à augmenter le nombre requis de registres en commun avec la permutation dès qu'au moins une séquence d'instruction l'a atteint. Dans ce cas, cela raccourcit la recherche, et en vingt minutes, on trouve une solution pour $S_2$. Cette séquence d'instruction est de longueur $20$, ce qui n'est pas satisfaisant car ce n'est pas la plus courte séquence d'instruction possible. En effet, on ne fait plus une recherche exhaustive, puisque l'on supprime toutes les configurations qui n'obtiennent pas  en un nombre minimal d'étape leur premier registre en commun avec la permutation, par exemple. On pourrait établir cette solution en autorisant un retard de 1-2 instructions pour atteindre chaque palier. Même dans ces cas, l'algorithme actuel est trop long.
 
 \subsection{Structure de l'algorithme}
 
-L'algorithme est écrit en java et divisé en 7 classes.
+L'algorithme est écrit en Java et divisé en 7 classes.
 \medbreak
 \begin{itemize}
 \setlength\itemsep{1em}
 \item \textit{Instruction.java} énumère les différentes instructions possibles, sans prendre en compte les registres.
-\item \textit{FullInstruction.java} énmuère les différentes instructions possibles, en prenant en compte les registres sur lesquels l'instruction est appliquée
+\item \textit{FullInstruction.java} énumère les différentes instructions possibles, en prenant en compte les registres sur lesquels l'instruction est appliquée
 \item \textit{InstructionCycle.java} renvoie une liste exhaustive de toutes les instructions possibles
 \item \textit{WorkspaceKey.java} s'occupe de créer une clé de hachage associé à une séquence d'instruction, permettant de travailler avec le HashSet dont nous avons précédemment parlé.
 \item \textit{Optimizer.java} est un objet associé à chaque séquence d'instruction. Il garde en mémoire la configuration courante des registres, ainsi que des flags "Read" et "Not". Il peut appliquer une instruction à la configuration, et procède à la vérification des conditions listées un peu plus haut.
