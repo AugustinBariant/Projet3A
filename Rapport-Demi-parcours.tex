@@ -32,7 +32,7 @@ Serpent est un algorithme de chiffrement par block présenté au concours AES en
 
 \subsection{Les $\mathrm{S}$-boxes}
 
-Les $\mathrm{S}$-boxes sont des permutations de $s_{16}$. Puisque chaque élément de $\{0,1,...,15\}$ peut être écrit avec 4 bits, on peut aussi interpréter les $\mathrm{S}$-boxes comme des bijections de $\{0,1\}^{4}$ dans lui-même. Serpent utilise 8 $\mathrm{S}$-boxes spécifiques pour le chiffrement, ainsi que leurs inverses utilisés pour le déchiffrement. Voici par exemple une des $\mathrm{S}$-boxes : $S_{2}$
+Les $\mathrm{S}$-boxes sont des permutations de $S_{16}$. Puisque chaque élément de $\{0,1,...,15\}$ peut être écrit avec 4 bits, on peut aussi interpréter les $\mathrm{S}$-boxes comme des bijections de $\{0,1\}^{4}$ dans lui-même. Serpent utilise 8 $\mathrm{S}$-boxes spécifiques pour le chiffrement, ainsi que leurs inverses utilisés pour le déchiffrement. Voici par exemple une des $\mathrm{S}$-boxes : $S_{2}$
 \medbreak
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}
@@ -101,7 +101,7 @@ On suppose que l'on possède 5 registres $r_{0}$, . . . , $r_{4}$, disponibles p
 \end{tabular}
 \end{center}
 \medbreak
- Si l'on arrive à effectuer des opérations sur les lignes, et que l'on retombe à la fin sur  les lignes $s_{0}$ à $s_{3}$, alors effectuer ces opérations sur un entier entre $0$ et $15$ revient à appliquer $S_{2}$ à cet entier. 
+ Si l'on effectue des opérations sur les lignes, et que l'on retombe à la fin sur les lignes $s_{0}$ à $s_{3}$, alors effectuer ces opérations sur un entier entre $0$ et $15$ revient à appliquer $S_{2}$ à cet entier. 
 Voici la liste des instructions x86 utilisables pour les S-boxes:
 \medbreak
 \begin{center}
@@ -142,12 +142,13 @@ Par exemple, on peut exécuter deux instructions $r_{4} := r_{0}$; $r_{0} :=r_{0
 \end{center}
 \medbreak
 
-Puis exécuter la série d'instruction suivante nous amène au resultat : 
+Puis exécuter la série d'instruction suivante nous amène au résultat: 
 
 $r_{0}:=r_{0}\oplus r_{3};r_{2}:=r_{2}\oplus r_{1};r_{2}:=r_{2}\oplus r_{0};r_{3}:=r_{3}+r_{4};r_{3}:=r_{3}\oplus r_{1};r_{4}:=r_{4}\oplus r_{2}; r_{1}:=r_{3}; r_{3}=r_{3}+r_{4};$
 
 $ r_{3}:=r_{3}\oplus r_{0}; r_{0}:=r_{0}\cdot r_{1}; r_{4}:=r_{4}\oplus r_{0}; r_{1}:=r_{1}\oplus r_{3}; r_{1}:=r_{1}\oplus r_{4}; r_{4}:=r_{4}\oplus 1 ;
-$\medbreak
+$
+\medbreak
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}
 \hline
@@ -169,9 +170,9 @@ On a donc réussi à retrouver notre S-box $S_{2}$ avec une séquence de 16 inst
 
 \subsection{Notre algorithme}
 
-L'objectif de ce projet est d'implémenter un algorithme qui prend en paramètre une permutation $P$ de $S_{16}$ et qui détermine la plus petite séquence d'instruction qui, appliquée aux 5 registres initiaux, donne $P$. Le processeur pouvant avoir plusieurs unités d'exécution, il faut aussi trouver des séquences d'instructions permettant au processeur d'utiliser toutes les unités d'exécution en même temps. Pour l'instant, nous n'avons pas abordé ce sujet.
+L'objectif de ce projet est d'implémenter un algorithme qui prend en paramètre une permutation $P$ de $S_{16}$ et qui détermine la plus petite séquence d'instruction qui, appliquée aux 5 registres initiaux, donne $P$. Le processeur pouvant avoir plusieurs cœurs, il faut aussi trouver des séquences d'instructions permettant le parallélisme qui donnent le même résultat. Pour l'instant, nous n'avons pas abordé ce sujet.
        
-Supposons que nous voulions retrouver une permutation $P$ donnée en paramètre. L'algorithme fonctionne par Brute-Force. Nous allons appliquer toutes les séquences d'instructions possibles aux registres initiaux, à la recherche de lignes égales à celles de la permutation $P$. On parcourt donc l'arbre des séquences d'instructions possibles en largeur tant que l'on ne trouve pas de solutions. En ce qui concerne le parallélisme, deux instructions peuvent être lancées en parallèle par le processeur si aucune d'entre elles ne lit une ligne modifiée par l'autre instruction.
+Supposons que nous voulions retrouver une permutation $P$ donnée en paramètre. L'algorithme fonctionne par Brute-Force. Nous allons appliquer toutes les séquences d'instructions possibles aux registres initiaux, à la recherche de lignes égales à celles de la permutation $P$. On parcourt donc l'arbre des séquences d'instructions possibles en largeur tant que l'on ne trouve pas de solutions. En ce qui concerne le parallélisme, deux instructions peuvent être lancées en parallèle si aucune d'entre elles ne lit une ligne modifiée par l'autre instruction.
 
 \subsection{Problèmes rencontrés}
 
@@ -194,14 +195,14 @@ Naturellement, il va donc falloir exclure certaines séquences d'instructions lo
 
 \item Les instructions n'utilisent que 5 registres.
 
-\item La récursion requiert un nombre croissant de registres égaux aux lignes de la permutation en paramètre (représentée sous forme binaire).
+\item La récursion requiert un nombre croissant de registres égaux aux lignes de la permutation en paramètre (représentée sous forme binaire). A chaque étape, on regarde combien de lignes de la table de vérité de $S_{2}$ sont présentes dans les registres, et on stocke cela dans une variable $NumberOfMatch$, allant de 0 à 4. Si ce nombre diminue après une instruction, on arrête la récursion.
 
 
 \end{itemize}
 
 \medbreak
 
-Ce dernier point est le moins évident à gérer. Dans notre état courant des choses, l'algorithme fonctionne en théorie (testé sur des permutations nécessitant des séquences d'instructions de longueur abordable) mais est trop long pour trouver des séquences pour les S-boxes. Une autre solution consiste à augmenter le nombre requis de registres en commun avec la permutation dès qu'au moins une séquence d'instruction l'a atteint. Dans ce cas, cela raccourcit la recherche, et en vingt minutes, on trouve une solution pour $S_2$. Cette séquence d'instruction est de longueur $20$, ce qui n'est pas satisfaisant car ce n'est pas la plus courte séquence d'instruction possible. En effet, on ne fait plus une recherche exhaustive, puisque l'on supprime toutes les configurations qui n'obtiennent pas  en un nombre minimal d'étape leur premier registre en commun avec la permutation, par exemple. On pourrait établir cette solution en autorisant un retard de 1-2 instructions pour atteindre chaque palier. Même dans ces cas, l'algorithme actuel est trop long.
+Ce dernier point est le moins évident à gérer. Dans notre état courant des choses, l'algorithme fonctionne en théorie (testé sur des permutations nécessitant des séquences d'instructions de longueur abordable) mais est trop long pour trouver des séquences pour les S-boxes. Une autre solution consiste à exiger que $NumberOfMatch$ doive être au moins égal au $NumberOfMatch$ le plus haut jamais atteint par une séquence d'instruction lors du parcours en largeur. Dans ce cas, cela raccourcit la recherche, puisque un bon nombre de séquences sont filtrées brutalement dès que le $NumberOfMatch$ maximal augmente de $1$. En vingt minutes, on trouve une solution pour $S_2$. Cette séquence d'instruction est de longueur $20$, ce qui n'est pas satisfaisant car ce n'est pas la plus courte séquence d'instruction possible. En effet, on ne fait plus une recherche exhaustive, puisque l'on supprime beaucoup de configurations lorsque $NumberOfMatch$ est incrémenté. On pourrait établir une nouvelle solution en autorisant un retard de 1-2 instructions pour atteindre chaque palier. Même dans ces cas, l'algorithme actuel est trop long.
 
 \subsection{Structure de l'algorithme}
 
@@ -217,6 +218,14 @@ L'algorithme est écrit en java et divisé en 7 classes.
 \item \textit{OptimizerSolver.java} crée un objet Optimizer de base, et s'occupe de faire la récursion, en stockant les objets dans une liste.
 \item \textit{Tests.java} permet de faire des tests automatiques sur OptimizerSolver.
  
+\end{itemize}
+\subsection{Travaux à venir}
+L'algorithme n'est pas terminé, il reste encore certaines tâches à réaliser:
+
+\begin{itemize}
+\item Optimiser l'algorithme afin de réduire son temps de calcul.
+\item Prouver l'exhaustivité de l'algorithme, en particulier avec la dernière condition ($NumberOfMatch$ croissant).
+\item Gérer l'algorithme pour un parallélisme avec au moins deux unités d'exécution arithmétique.
 \end{itemize}
 \section{Bibliographie}
 
