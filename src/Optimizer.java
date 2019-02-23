@@ -8,7 +8,7 @@ public class Optimizer {
 	private static int cardinalityLog;
 	private static int[] permutation = new int[1<<cardinalityLog];
 	private static int[] permutationLines; 
-	public static int numberOfMatch;
+	public int numberOfMatch;
 	private static int numberOfOperation;
 	private static int[] returnColumns = new int[cardinalityLog+1];
 	private static int postPoningCycles=3;
@@ -21,8 +21,8 @@ public class Optimizer {
 	Optimizer() {
 		
 	}
-	Optimizer(int[] perm, int cardLog) {
-		cardinalityLog=cardLog;
+	Optimizer(int[] perm) {
+		cardinalityLog = 32-Integer.numberOfLeadingZeros(perm.length-1);;
 		permutation = perm;
 		operations = new ArrayList<FullInstruction>();
 		workspace = new boolean[1<<cardinalityLog][cardinalityLog+1];
@@ -125,6 +125,12 @@ public class Optimizer {
 		if(NbOfMatch==cardinalityLog) {
 			returnColumns = returnCols;
 		}
+		if(numberOfMatch>NbOfMatch) {
+			throw new Exception();
+		}
+		numberOfMatch = NbOfMatch;
+		return;
+		/*
 		if(numberOfOperation+postPoningCycles<=operations.size()+1) {
 			if(numberOfMatch>NbOfMatch) {
 				throw new Exception();
@@ -147,6 +153,7 @@ public class Optimizer {
 			}
 			return;
 		}
+		*/
 		
 	}
 	private void updateNegateAndCheck(FullInstruction f) throws Exception {
@@ -319,7 +326,7 @@ public class Optimizer {
 			for(int j=0;j<(1<<cardinalityLog)-1;j++) {
 				System.out.print((workspace[j][i]?1:0) +" ,");
 			}
-			System.out.print((workspace[cardinalityLog-1][i]?1:0) +" ]\n");
+			System.out.print((workspace[(1<<cardinalityLog)-1][i]?1:0) +" ]\n");
 			
 		}
 	}
@@ -335,7 +342,7 @@ public class Optimizer {
 			
 		}
 		return tab;
-	}
+	} 
 	
 	public static void main(String[] args){
 		Timestamp ts = Timestamp.from(java.time.Clock.systemUTC().instant());
@@ -343,19 +350,22 @@ public class Optimizer {
 		int[] permutation2 = {0,2,1,3,4,6,5,7,8,10,9,11,12,13,14,15};
 		int[] s2 = {8, 6, 7, 9, 3, 12, 10, 15, 13, 1, 14, 4, 0, 11, 5, 2};
 		int[] s1 = {15, 12, 2, 7, 9, 0, 5, 10, 1, 11, 14, 8, 6, 13, 3, 4};
-		int[] cardinality = {4,3,6,5,0,1,7,2};
+		int[] cardinality = {2,0,4,3,5,7,1,6};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
 		
 		
-		OptimizerSolver o = new OptimizerSolver(cardinality,3); // XXX: bogus object creation
+		OptimizerSolver o = new OptimizerSolver(s2); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
 		
-		
+		/*
 		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
 		long diff = ts2.getTime()-ts.getTime();
+		Tests.initializeTestingSetSolutions();
+		Tests.testBasics();
 		System.out.print("\n Time: "+diff+" ms");
-		
+		 */
+		//Tests.testBasics();
 		int[] expected = permutation;// XXX: write here the desired output
 
 	}

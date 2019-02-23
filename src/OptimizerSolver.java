@@ -1,22 +1,27 @@
 import java.util.ArrayList;
 import java.util.List;
-
+import java.lang.Math;
+import java.lang.Integer;
 public class OptimizerSolver {
 	private List<Optimizer> L;
 	private int[] permutation;
 	private Optimizer finalOptimizer;
 	private int cardinalityLog;
 	
-	OptimizerSolver(int[] p, int cardLog){
+	OptimizerSolver(int[] p){
 		permutation = p;
 		L = new ArrayList<Optimizer>();
 		finalOptimizer = null;
-		cardinalityLog = cardLog;
+		cardinalityLog = 32-Integer.numberOfLeadingZeros(p.length-1);
 	}
 	
 	public Optimizer solve(){
-		L.add(new Optimizer(permutation,cardinalityLog));
+		L.add(new Optimizer(permutation));
 		int m=0;
+		if(L.get(0).numberOfMatch==cardinalityLog) {
+			System.out.print("\nSolution trouvée en 0 opérations\n");
+			return L.get(0);
+		}
 		while(true) {
 			if(L.isEmpty()) {
 				System.out.print("Liste Vide");
