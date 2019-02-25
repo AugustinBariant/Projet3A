@@ -353,18 +353,16 @@ public class Optimizer {
 		int[] cardinality = {2,0,4,3,5,7,1,6};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
 		
-		
+		/*
 		OptimizerSolver o = new OptimizerSolver(s2); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
+		 */
 		
-		/*
 		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
 		long diff = ts2.getTime()-ts.getTime();
-		Tests.initializeTestingSetSolutions();
-		Tests.testBasics();
 		System.out.print("\n Time: "+diff+" ms");
-		 */
+		Tests.test4x4Permutation();
 		//Tests.testBasics();
 		int[] expected = permutation;// XXX: write here the desired output
 
