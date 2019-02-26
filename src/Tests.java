@@ -148,6 +148,7 @@ class Tests {
 					toTest.applyInstruction(obtained.get(k));
 				}
 				assertTrue(Arrays.equals(permutation,toTest.getPermutation()),"Permutation " + a + b + c + d + " has failed the test");
+				System.out.print(Arrays.equals(permutation,toTest.getPermutation()));
 			}
 		}
 	}

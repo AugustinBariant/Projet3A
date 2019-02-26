@@ -13,9 +13,9 @@ public class Optimizer {
 	private static int[] returnColumns = new int[cardinalityLog+1];
 	private static int postPoningCycles=3;
 	public List<FullInstruction> operations;
-	private boolean[][] workspace;
-	private boolean[] negated;
-	private boolean[] read;
+	private BooleanTab[] workspace;
+	private BooleanTab negated;
+	private BooleanTab read;
 	
 	
 	Optimizer() {
@@ -25,23 +25,18 @@ public class Optimizer {
 		cardinalityLog = 32-Integer.numberOfLeadingZeros(perm.length-1);;
 		permutation = perm;
 		operations = new ArrayList<FullInstruction>();
-		workspace = new boolean[1<<cardinalityLog][cardinalityLog+1];
-		for(int i =0; i<(1<<cardinalityLog);i++) {
-			for(int k=0;k<cardinalityLog;k++) {
-				workspace[i][k] = ((i>>k)%2==1);
+		workspace = new BooleanTab[cardinalityLog+1];
+		for(int i =0; i<cardinalityLog+1;i++) {
+			workspace[i] = new BooleanTab();
+			for(int k=0;k<1<<cardinalityLog;k++) {
+				workspace[i].set(k,1==(k>>i)%2);
 			}
-			workspace[i][cardinalityLog] = false;
+			 
 		}
-		negated = new boolean[cardinalityLog+1];
-		for(int i =0;i<cardinalityLog+1;i++){
-			negated[i]=false;
-		}
+		negated = new BooleanTab();
 		numberOfMatch=0;
-		read = new boolean[cardinalityLog+1];
-		for(int i=0;i<cardinalityLog+1;i++) {
-			read[i]=false;
-		}
-		read[cardinalityLog]=true;
+		read = new BooleanTab();
+		read.set(cardinalityLog, true);
 		tree = new HashSet<WorkspaceKey>();
 		permutationLines = new int[cardinalityLog];
 		initializePermutation();
@@ -66,29 +61,25 @@ public class Optimizer {
 	}
 	// ApplyInstruction applies the instruction then checks if the instruction is valid in the current state of the workspace.
 	public boolean applyInstruction(FullInstruction f) {
-		boolean[] L1 = new boolean[1<<cardinalityLog];
-		boolean[] L2 = new boolean[1<<cardinalityLog];
-		for(int i =0; i<(1<<cardinalityLog);i++) {
-			L1[i] = workspace[i][f.column1];
-			switch(f.instruct) {
-				case And:
-					workspace[i][f.column1]&=workspace[i][f.column2];
-					break;
-				case Or:
-					workspace[i][f.column1]|=workspace[i][f.column2];
-					break;
-				case Xor:
-					workspace[i][f.column1]^=workspace[i][f.column2];
-					break;
-				case Not:
-					workspace[i][f.column1]=!workspace[i][f.column1];
-					break;
-				case Mov:
-					workspace[i][f.column1]=workspace[i][f.column2];
-					break;
-			}
-			L2[i] = workspace[i][f.column1];
+		int L1 = workspace[f.column1].mainValue;
+		switch(f.instruct) {
+			case And:
+				workspace[f.column1].mainValue &= workspace[f.column2].mainValue;
+				break;
+			case Or:
+				workspace[f.column1].mainValue |= workspace[f.column2].mainValue;
+				break;
+			case Xor:
+				workspace[f.column1].mainValue ^= workspace[f.column2].mainValue;
+				break;
+			case Not:
+				workspace[f.column1].mainValue =(~workspace[f.column1].mainValue+(1<<(1<<cardinalityLog)))%(1<<(1<<cardinalityLog));
+				break;
+			case Mov:
+				workspace[f.column1].mainValue = workspace[f.column2].mainValue;
+				break;
 		}
+		int L2 = workspace[f.column1].mainValue;
 		operations.add(f);
 		if(!check(f,L1,L2)) {
 			//for(int i =0; i<16; i++) {
@@ -105,12 +96,7 @@ public class Optimizer {
 		List<Integer> s = new ArrayList<Integer>();
 		int[] returnCols = new int[cardinalityLog];
 		for(int k =0; k<cardinalityLog+1;k++) {
-			a=0;
-			for(int i=0; i<(1<<cardinalityLog);i+=1){
-				if(workspace[i][k]) {
-					a+=(1<<i);
-				}
-			}
+			a=workspace[k].mainValue;
 			for(int j=0;j<cardinalityLog;j++) {
 				if(!s.contains(j)) {
 					if(a==permutationLines[j]) {
@@ -159,26 +145,26 @@ public class Optimizer {
 	private void updateNegateAndCheck(FullInstruction f) throws Exception {
 		switch(f.instruct) {
 			case And:
-				negated[f.column1]=false;
-				negated[f.column2]=false;
+				negated.set(f.column1,false);
+				negated.set(f.column2,false);
 				break;
 			case Or:
-				negated[f.column1]=false;
-				negated[f.column2]=false;
+				negated.set(f.column1,false);
+				negated.set(f.column2,false);
 				break;
 			case Xor:
-				negated[f.column1]=false;
-				negated[f.column2]=false;
+				negated.set(f.column1,false);
+				negated.set(f.column2,false);
 				break;
 			case Not:
-				if(negated[f.column1]) {
+				if(negated.get(f.column1)) {
 					throw new Exception();
 				}else {
-					negated[f.column1]=true;
+					negated.set(f.column1,true);
 				}
 				break;
 			case Mov:
-				negated[f.column1]=negated[f.column2];
+				negated.set(f.column1,negated.get(f.column2));
 				break;	
 		}
 		return;
@@ -189,14 +175,7 @@ public class Optimizer {
 				if(i==f.column1) {
 					continue;
 				}
-				boolean isCopy = true;
-				for(int a=0;a<(1<<cardinalityLog);a++) {
-					if(workspace[a][i]^workspace[a][f.column1]) {
-						isCopy=false;
-						break;
-					}
-				}
-				if(isCopy) {
+				if(workspace[i].mainValue==workspace[f.column1].mainValue) {
 					throw new Exception();
 				}
 			}
@@ -210,7 +189,7 @@ public class Optimizer {
 		for(int i =0; i<(1<<cardinalityLog);i++) {
 			a=0;
 			for(int k=0; k<cardinalityLog+1;k+=1){
-				if(workspace[i][k]) {
+				if(workspace[k].get(i)) {
 					a+=(1<<k);
 				}
 			}
@@ -229,38 +208,28 @@ public class Optimizer {
 			case Not:
 				break;
 			case Mov:
-				if(!read[f.column1]) {
+				if(!read.get(f.column1)) {
 					throw new Exception();
 				}
-				read[f.column1]=false;
-				read[f.column2]=false;
+				read.set(f.column1, false);
+				read.set(f.column2, false);
 				break;
 			default:
-				read[f.column1]=false;
-				read[f.column2]=true;
+				read.set(f.column1, false);
+				read.set(f.column2, true);
 				break;	
 		}
 		return;
 	}
-	private void checkEqual(boolean[] L1, boolean[] L2) throws Exception{
-		for(int i=0;i<L1.length;i++) {
-			if(L1[i]!=L2[i]) {
-				return;
-			}
+	private void checkEqual(int L1, int L2) throws Exception{
+		if(L1==L2) {
+			throw new Exception();
 		}
-		throw new Exception();
+		return;
 	}
 	// Check if the new line is either entirely true or entirely false
-	private void checkTrueFalse(boolean[] L1) throws Exception{
-		boolean b = true;
-		boolean c = true;
-		int i=0;
-		while((b||c)&&i<(1<<cardinalityLog)) {
-			b&=L1[i];
-			c&=!L1[i];
-			i+=1;
-		}
-		if(b||c) {
+	private void checkTrueFalse(int L1) throws Exception{
+		if(L1==0 || (~L1)%(1<<(1<<cardinalityLog))==0) {
 			throw new Exception();
 		}
 		return;
@@ -268,13 +237,7 @@ public class Optimizer {
 	private void checkAndUpdateTree() throws Exception{
 		int[] L = new int[cardinalityLog+1];
 		for(int k =0; k<cardinalityLog+1;k++) {
-			L[k]=0;
-			for(int i=0; i<(1<<cardinalityLog);i+=1){
-				if(workspace[i][k]) {
-					L[k]+=(1<<i);
-				}
-			}
-			//System.out.print(L[k]+"\n");
+			L[k]=workspace[k].mainValue;
 		}
 		WorkspaceKey t = new WorkspaceKey(L);
 		if(tree.contains(t)) {
@@ -285,7 +248,7 @@ public class Optimizer {
 		
 	}
 	
-	private boolean check(FullInstruction f, boolean[] L1, boolean[] L2) {
+	private boolean check(FullInstruction f, int L1, int L2) {
 		try {
 			checkPermutation();
 			updateNegateAndCheck(f);
@@ -303,18 +266,18 @@ public class Optimizer {
 	}
 	public Optimizer copy() {
 		List<FullInstruction> op = new ArrayList<FullInstruction>();
-		boolean[][] ws = new boolean[1<<cardinalityLog][cardinalityLog+1];
-		for(int i=0;i<(1<<cardinalityLog);i++) {
-			ws[i]=workspace[i].clone();
+		BooleanTab[] ws = new BooleanTab[cardinalityLog+1];
+		for(int i=0;i<(cardinalityLog+1);i++) {
+			ws[i]=new BooleanTab(workspace[i].mainValue);
 		}
 		for(FullInstruction el : operations) {
 			op.add(el);
 		}
 		Optimizer o = new Optimizer();
-		o.read = read.clone();
+		o.read = new BooleanTab(read.mainValue);
 		o.operations = op;
 		o.workspace = ws;
-		o.negated=negated.clone();
+		o.negated=new BooleanTab(negated.mainValue);
 		//o.numberOfMatch=numberOfMatch;
 		return o;
 	}
@@ -324,10 +287,10 @@ public class Optimizer {
 		for(int i =0;i<cardinalityLog+1;i++) {
 			System.out.print("[");
 			for(int j=0;j<(1<<cardinalityLog)-1;j++) {
-				System.out.print((workspace[j][i]?1:0) +" ,");
+				System.out.print((workspace[i].get(j)?1:0) +" ,");
 			}
-			System.out.print((workspace[(1<<cardinalityLog)-1][i]?1:0) +" ]\n");
-			
+			System.out.print((workspace[i].get((1<<cardinalityLog)-1)?1:0) +" ]");
+			System.out.print(" " + workspace[i].mainValue +"\n");
 		}
 	}
 	
@@ -335,7 +298,7 @@ public class Optimizer {
 		int[] tab = new int[1<<cardinalityLog];
 		for(int i =0;i<(1<<cardinalityLog);i++) {
 			for(int k=0;k<cardinalityLog;k++) {
-				if(workspace[i][returnColumns[k]]) {
+				if(workspace[returnColumns[k]].get(i)) {
 					tab[i]+=(1<<k);
 				}
 			}
@@ -352,17 +315,17 @@ public class Optimizer {
 		int[] s1 = {15, 12, 2, 7, 9, 0, 5, 10, 1, 11, 14, 8, 6, 13, 3, 4};
 		int[] cardinality = {2,0,4,3,5,7,1,6};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
-		
 		/*
 		OptimizerSolver o = new OptimizerSolver(s2); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
-		 */
 		
+		*/
 		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
 		long diff = ts2.getTime()-ts.getTime();
 		System.out.print("\n Time: "+diff+" ms");
-		Tests.test4x4Permutation();
+		Tests.test9();
+		
 		//Tests.testBasics();
 		int[] expected = permutation;// XXX: write here the desired output
 
