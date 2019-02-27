@@ -29,13 +29,12 @@ public class OptimizerSolver {
 			}
 			Optimizer o = L.get(0);
 			L.remove(o);
-			
 			InstructionCycle cycle = new InstructionCycle(cardinalityLog);
 			FullInstruction i = cycle.updateNewInstruction();
 			//o.PrintCurrentState();
 			while(!i.isEnd) {
-				System.out.print("\n hi " + o.workspace.get(0).mainValue);
-				o.printCurrentState();
+				//System.out.print("\n hi " + o.workspace.get(0).mainValue);
+				
 				Optimizer save = o.applyInstruction(i);
 				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
 				if(save!=null) {
@@ -43,11 +42,9 @@ public class OptimizerSolver {
 					if(save.numberOfMatch==cardinalityLog) {
 						System.out.print("\nSolution trouvée en " + save.operations.size() + " opérations\n");
 						int k =0;
-						InstructionList op = save.operations;
-						while(op.node!=null) {
+						for(FullInstruction el : save.operations.toListInstruction()) {
 							k+=1;
-							System.out.print("Instruction "+  k+ " : " + op.node.stringToPrint());
-							op = op.tail;
+							System.out.print("Instruction "+  k+ " : " + el.stringToPrint());
 						}
 						finalOptimizer = save; 
 						break;

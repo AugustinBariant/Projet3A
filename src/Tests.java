@@ -66,6 +66,8 @@ class Tests {
 		expected.add(new FullInstruction(3,3,0));
 		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {2,0,1,3,5,6,7,4};
+		Optimizer op = new Optimizer(permutation);
+		op.applyInstructions(expectedInstructionList);
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
 		InstructionList obtained = obtainedOptimizer.operations;	
@@ -153,7 +155,7 @@ class Tests {
 				Optimizer obtainedOptimizer = o.solve();
 				InstructionList obtained = obtainedOptimizer.operations;	
 				Optimizer toTest = new Optimizer(permutation);
-				toTest.applyInstructions(obtained);
+				toTest = toTest.applyInstructions(obtained);
 				assertTrue(Arrays.equals(permutation,toTest.getPermutation()),"Permutation " + a + b + c + d + " has failed the test");
 				System.out.print(Arrays.equals(permutation,toTest.getPermutation()));
 			}
@@ -182,10 +184,10 @@ class Tests {
 			return;
 		}
 		Optimizer op1 = new Optimizer(permutation);
-		Optimizer op2 = new Optimizer(permutation);
-		op1.applyInstructions(instructionListToTest);
-		op2.applyInstructions(instructionListStandard);
+		op1 = op1.applyInstructions(instructionListToTest);
 		int[] permResult = op1.getPermutation();
+		Optimizer op2 = new Optimizer(permutation);
+		op2 = op2.applyInstructions(instructionListStandard);
 		assertTrue(Arrays.equals(permResult,permutation), "La permutation n'est pas égal au résultat trouvé après la méthode .solve()\n");
 		assertTrue(Arrays.equals(permResult,op2.getPermutation()),"La permutation n'est pas retrouvée avec la liste d'instruction de réference\n");
 		System.out.print(java.util.Arrays.equals(permResult,permutation) && java.util.Arrays.equals(permResult,op2.getPermutation()));

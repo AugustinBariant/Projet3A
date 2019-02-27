@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.ArrayList;
 
 public class InstructionList {
 	final FullInstruction node;
@@ -30,4 +31,18 @@ public class InstructionList {
 		}
 		return l;
 	}
+	public List<FullInstruction> toListInstruction(){
+		List<FullInstruction> l;
+		if(!hasNext()) {
+			l = new ArrayList<FullInstruction>();
+			if(node!=null) {
+				l.add(node);
+			}
+		}else {
+			l = tail.toListInstruction();
+			l.add(node);
+		}
+		return l;
+	}
+	
 }

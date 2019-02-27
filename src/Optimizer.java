@@ -32,13 +32,13 @@ public class Optimizer {
 		workspace = new WorkspaceList(cardinalityLog);
 		negated = new BooleanTab();
 		numberOfMatch=0;
-		read = new BooleanTab();
-		read.set(cardinalityLog, true);
+		BooleanTab r = new BooleanTab();
+		read = r.set(cardinalityLog, true);
 		tree = new HashSet<WorkspaceKey>();
 		permutationLines = new int[cardinalityLog];
 		initializePermutation();
 		try {
-			updateNumberOfMatch();
+			numberOfMatch = updateNumberOfMatch(workspace);
 		}catch(Exception e) {
 			
 		}
@@ -62,13 +62,13 @@ public class Optimizer {
 				}
 			}
 		}
+		
 	}
 	// ApplyInstruction applies the instruction then checks if the instruction is valid in the current state of the workspace.
 	public Optimizer applyInstruction(FullInstruction f) {
 		int L1 = workspace.get(f.column1).mainValue;
 		WorkspaceList newWorkSpace;
 		InstructionList newOperations;
-		System.out.print("\n" + f.stringToPrint() + " "+ workspace.get(f.column1).mainValue);
 		switch(f.instruct) {
 			case And:
 				newWorkSpace = workspace.set(f.column1, workspace.get(f.column1).and(workspace.get(f.column2)));
@@ -88,17 +88,16 @@ public class Optimizer {
 			default:
 				newWorkSpace = new WorkspaceList(cardinalityLog);
 		}
-		System.out.print("\n" + f.stringToPrint() + " "+ newWorkSpace.get(f.column1).mainValue);
 		int L2 = newWorkSpace.get(f.column1).mainValue;
 		return check(f,L1,L2,newWorkSpace);
 	}
-	private int updateNumberOfMatch() throws Exception {
+	private int updateNumberOfMatch(WorkspaceList ws) throws Exception {
 		int a;
 		int NbOfMatch = 0;
 		List<Integer> s = new ArrayList<Integer>();
 		int[] returnCols = new int[cardinalityLog];
 		for(int k =0; k<cardinalityLog+1;k++) {
-			a=workspace.get(k).mainValue;
+			a=ws.get(k).mainValue;
 			for(int j=0;j<cardinalityLog;j++) {
 				if(!s.contains(j)) {
 					if(a==permutationLines[j]) {
@@ -171,13 +170,13 @@ public class Optimizer {
 		}
 		return newNegated;
 	}
-	private void checkCopy(FullInstruction f) throws Exception {
+	private void checkCopy(FullInstruction f, WorkspaceList ws) throws Exception {
 		if(f.instruct!=Instruction.Mov) {
 			for(int i=0; i<cardinalityLog+1; i++) {
 				if(i==f.column1) {
 					continue;
 				}
-				if(workspace.get(i).mainValue==workspace.get(f.column1).mainValue) {
+				if(ws.get(i).mainValue==ws.get(f.column1).mainValue) {
 					throw new Exception();
 				}
 			}
@@ -185,13 +184,13 @@ public class Optimizer {
 		return;
 	}
 	// Checks if every line is different
-	private void checkPermutation() throws Exception{
+	private void checkPermutation(WorkspaceList ws) throws Exception{
 		int[] L = new int[1<<(cardinalityLog+1)];
 		int a;
 		for(int i =0; i<(1<<cardinalityLog);i++) {
 			a=0;
 			for(int k=0; k<cardinalityLog+1;k+=1){
-				if(workspace.get(k).get(i)) {
+				if(ws.get(k).get(i)) {
 					a+=(1<<k);
 				}
 			}
@@ -236,10 +235,10 @@ public class Optimizer {
 		}
 		return;
 	}
-	private void checkAndUpdateTree() throws Exception{
+	private void checkAndUpdateTree(WorkspaceList ws) throws Exception{
 		int[] L = new int[cardinalityLog+1];
 		for(int k =0; k<cardinalityLog+1;k++) {
-			L[k]=workspace.get(k).mainValue;
+			L[k]=ws.get(k).mainValue;
 		}
 		WorkspaceKey t = new WorkspaceKey(L);
 		if(tree.contains(t)) {
@@ -256,14 +255,14 @@ public class Optimizer {
 		int nOfMatch;
 		InstructionList newOperations = new InstructionList(f,operations);
 		try {
-			checkPermutation();
+			checkPermutation(ws);
 			n = updateNegateAndCheck(f);
-			checkCopy(f);
-			nOfMatch = updateNumberOfMatch();
+			checkCopy(f,ws);
+			nOfMatch = updateNumberOfMatch(ws);
 			r = updateAndCheckRead(f);
 			checkEqual(L1,L2);
 			checkTrueFalse(L2);
-			checkAndUpdateTree();
+			checkAndUpdateTree(ws);
 			return new Optimizer(r,n,ws,newOperations,nOfMatch) ;
 		}catch(Exception e) {
 			return null;
@@ -317,9 +316,9 @@ public class Optimizer {
 	
 	public Optimizer applyInstructions(InstructionList l) {
 		Optimizer op = this;
-		while(l!=null && l.node!=null) {
-			op = op.applyInstruction(l.node);
-			l = l.tail;
+		List<FullInstruction> list = l.toListInstruction();
+		for(int i=0;i<list.size();i++) {
+			op = op.applyInstruction(list.get(i));
 		}
 		return op;
 	}
@@ -332,17 +331,18 @@ public class Optimizer {
 		int[] s1 = {15, 12, 2, 7, 9, 0, 5, 10, 1, 11, 14, 8, 6, 13, 3, 4};
 		int[] cardinality = {2,0,4,3,5,7,1,6};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
-		/*
+		
 		OptimizerSolver o = new OptimizerSolver(s2); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
 		
-		*/
+		/*
 		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
 		long diff = ts2.getTime()-ts.getTime();
 		System.out.print("\n Time: "+diff+" ms");
-		Tests.test9();
+		Tests.test4x4Permutation();
 		//Tests.testBasics();
+		 */
 		int[] expected = permutation;// XXX: write here the desired output
 
 	}
