@@ -34,16 +34,20 @@ public class OptimizerSolver {
 			FullInstruction i = cycle.updateNewInstruction();
 			//o.PrintCurrentState();
 			while(!i.isEnd) {
-				Optimizer save = o.copy();
+				System.out.print("\n hi " + o.workspace.get(0).mainValue);
+				o.printCurrentState();
+				Optimizer save = o.applyInstruction(i);
 				//System.out.print(Instruction.instr_names[el.instruct.Id] + "(" + el.column1 + "," + el.column2 +")\n");
-				if(save.applyInstruction(i)) {
+				if(save!=null) {
 					//System.out.print("added instrct :" + i.StringToPrint());
 					if(save.numberOfMatch==cardinalityLog) {
 						System.out.print("\nSolution trouvée en " + save.operations.size() + " opérations\n");
 						int k =0;
-						for(FullInstruction el:save.operations) {
+						InstructionList op = save.operations;
+						while(op.node!=null) {
 							k+=1;
-							System.out.print("Instruction "+  k+ " : " + el.stringToPrint());
+							System.out.print("Instruction "+  k+ " : " + op.node.stringToPrint());
+							op = op.tail;
 						}
 						finalOptimizer = save; 
 						break;

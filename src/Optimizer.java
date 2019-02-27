@@ -12,27 +12,24 @@ public class Optimizer {
 	private static int numberOfOperation;
 	private static int[] returnColumns = new int[cardinalityLog+1];
 	private static int postPoningCycles=3;
-	public List<FullInstruction> operations;
-	private BooleanTab[] workspace;
-	private BooleanTab negated;
-	private BooleanTab read;
+	public InstructionList operations;
+	public final WorkspaceList workspace;
+	private final BooleanTab negated;
+	private final BooleanTab read;
 	
 	
 	Optimizer() {
-		
+		operations = null;
+		negated = null;
+		read =null;
+		workspace = null;
+		numberOfMatch = 0;
 	}
 	Optimizer(int[] perm) {
 		cardinalityLog = 32-Integer.numberOfLeadingZeros(perm.length-1);;
 		permutation = perm;
-		operations = new ArrayList<FullInstruction>();
-		workspace = new BooleanTab[cardinalityLog+1];
-		for(int i =0; i<cardinalityLog+1;i++) {
-			workspace[i] = new BooleanTab();
-			for(int k=0;k<1<<cardinalityLog;k++) {
-				workspace[i].set(k,1==(k>>i)%2);
-			}
-			 
-		}
+		operations = new InstructionList();
+		workspace = new WorkspaceList(cardinalityLog);
 		negated = new BooleanTab();
 		numberOfMatch=0;
 		read = new BooleanTab();
@@ -47,6 +44,13 @@ public class Optimizer {
 		}
 		
 	}
+	Optimizer(BooleanTab r, BooleanTab neg, WorkspaceList ws, InstructionList op, int nOfMatch){
+		operations = op;
+		read = r;
+		negated  = neg;
+		workspace = ws;
+		numberOfMatch = nOfMatch;
+	}
 	
 	
 	private void initializePermutation() {
@@ -60,43 +64,41 @@ public class Optimizer {
 		}
 	}
 	// ApplyInstruction applies the instruction then checks if the instruction is valid in the current state of the workspace.
-	public boolean applyInstruction(FullInstruction f) {
-		int L1 = workspace[f.column1].mainValue;
+	public Optimizer applyInstruction(FullInstruction f) {
+		int L1 = workspace.get(f.column1).mainValue;
+		WorkspaceList newWorkSpace;
+		InstructionList newOperations;
+		System.out.print("\n" + f.stringToPrint() + " "+ workspace.get(f.column1).mainValue);
 		switch(f.instruct) {
 			case And:
-				workspace[f.column1].mainValue &= workspace[f.column2].mainValue;
+				newWorkSpace = workspace.set(f.column1, workspace.get(f.column1).and(workspace.get(f.column2)));
 				break;
 			case Or:
-				workspace[f.column1].mainValue |= workspace[f.column2].mainValue;
+				newWorkSpace = workspace.set(f.column1, workspace.get(f.column1).or(workspace.get(f.column2)));
 				break;
 			case Xor:
-				workspace[f.column1].mainValue ^= workspace[f.column2].mainValue;
+				newWorkSpace = workspace.set(f.column1, workspace.get(f.column1).xor(workspace.get(f.column2)));
 				break;
 			case Not:
-				workspace[f.column1].mainValue =(~workspace[f.column1].mainValue+(1<<(1<<cardinalityLog)))%(1<<(1<<cardinalityLog));
+				newWorkSpace = workspace.set(f.column1, workspace.get(f.column1).not(cardinalityLog));
 				break;
 			case Mov:
-				workspace[f.column1].mainValue = workspace[f.column2].mainValue;
+				newWorkSpace = workspace.set(f.column1, workspace.get(f.column2).mov());
 				break;
+			default:
+				newWorkSpace = new WorkspaceList(cardinalityLog);
 		}
-		int L2 = workspace[f.column1].mainValue;
-		operations.add(f);
-		if(!check(f,L1,L2)) {
-			//for(int i =0; i<16; i++) {
-				//Workspace[i][f.column1]=L[i];
-			//}
-			return false;
-		}
-		
-		return true;
+		System.out.print("\n" + f.stringToPrint() + " "+ newWorkSpace.get(f.column1).mainValue);
+		int L2 = newWorkSpace.get(f.column1).mainValue;
+		return check(f,L1,L2,newWorkSpace);
 	}
-	private void updateNumberOfMatch() throws Exception {
+	private int updateNumberOfMatch() throws Exception {
 		int a;
 		int NbOfMatch = 0;
 		List<Integer> s = new ArrayList<Integer>();
 		int[] returnCols = new int[cardinalityLog];
 		for(int k =0; k<cardinalityLog+1;k++) {
-			a=workspace[k].mainValue;
+			a=workspace.get(k).mainValue;
 			for(int j=0;j<cardinalityLog;j++) {
 				if(!s.contains(j)) {
 					if(a==permutationLines[j]) {
@@ -114,8 +116,7 @@ public class Optimizer {
 		if(numberOfMatch>NbOfMatch) {
 			throw new Exception();
 		}
-		numberOfMatch = NbOfMatch;
-		return;
+		return NbOfMatch;
 		/*
 		if(numberOfOperation+postPoningCycles<=operations.size()+1) {
 			if(numberOfMatch>NbOfMatch) {
@@ -142,32 +143,33 @@ public class Optimizer {
 		*/
 		
 	}
-	private void updateNegateAndCheck(FullInstruction f) throws Exception {
+	private BooleanTab updateNegateAndCheck(FullInstruction f) throws Exception {
+		BooleanTab newNegated;
 		switch(f.instruct) {
 			case And:
-				negated.set(f.column1,false);
-				negated.set(f.column2,false);
+				newNegated = negated.set(f.column1,false).set(f.column2,false);
 				break;
 			case Or:
-				negated.set(f.column1,false);
-				negated.set(f.column2,false);
+				newNegated = negated.set(f.column1,false).set(f.column2,false);
 				break;
 			case Xor:
-				negated.set(f.column1,false);
-				negated.set(f.column2,false);
+				newNegated = negated.set(f.column1,false).set(f.column2,false);
 				break;
 			case Not:
 				if(negated.get(f.column1)) {
 					throw new Exception();
 				}else {
-					negated.set(f.column1,true);
+					newNegated = negated.set(f.column1,true);
 				}
 				break;
 			case Mov:
-				negated.set(f.column1,negated.get(f.column2));
+				newNegated = negated.set(f.column1,negated.get(f.column2));
 				break;	
+			default:
+				newNegated = new BooleanTab();
+				break;
 		}
-		return;
+		return newNegated;
 	}
 	private void checkCopy(FullInstruction f) throws Exception {
 		if(f.instruct!=Instruction.Mov) {
@@ -175,7 +177,7 @@ public class Optimizer {
 				if(i==f.column1) {
 					continue;
 				}
-				if(workspace[i].mainValue==workspace[f.column1].mainValue) {
+				if(workspace.get(i).mainValue==workspace.get(f.column1).mainValue) {
 					throw new Exception();
 				}
 			}
@@ -189,7 +191,7 @@ public class Optimizer {
 		for(int i =0; i<(1<<cardinalityLog);i++) {
 			a=0;
 			for(int k=0; k<cardinalityLog+1;k+=1){
-				if(workspace[k].get(i)) {
+				if(workspace.get(k).get(i)) {
 					a+=(1<<k);
 				}
 			}
@@ -203,23 +205,23 @@ public class Optimizer {
 		
 	}
 	
-	private void updateAndCheckRead(FullInstruction f) throws Exception{
+	private BooleanTab updateAndCheckRead(FullInstruction f) throws Exception{
+		BooleanTab newRead;
 		switch(f.instruct) {
 			case Not:
+				newRead = new BooleanTab(read.mainValue);
 				break;
 			case Mov:
 				if(!read.get(f.column1)) {
 					throw new Exception();
 				}
-				read.set(f.column1, false);
-				read.set(f.column2, false);
+				newRead  = read.set(f.column1, false).set(f.column2, false);
 				break;
 			default:
-				read.set(f.column1, false);
-				read.set(f.column2, true);
+				newRead = read.set(f.column1, false).set(f.column2, true);
 				break;	
 		}
-		return;
+		return newRead;
 	}
 	private void checkEqual(int L1, int L2) throws Exception{
 		if(L1==L2) {
@@ -237,7 +239,7 @@ public class Optimizer {
 	private void checkAndUpdateTree() throws Exception{
 		int[] L = new int[cardinalityLog+1];
 		for(int k =0; k<cardinalityLog+1;k++) {
-			L[k]=workspace[k].mainValue;
+			L[k]=workspace.get(k).mainValue;
 		}
 		WorkspaceKey t = new WorkspaceKey(L);
 		if(tree.contains(t)) {
@@ -248,27 +250,32 @@ public class Optimizer {
 		
 	}
 	
-	private boolean check(FullInstruction f, int L1, int L2) {
+	private Optimizer check(FullInstruction f, int L1, int L2, WorkspaceList ws) {
+		BooleanTab r;
+		BooleanTab n;
+		int nOfMatch;
+		InstructionList newOperations = new InstructionList(f,operations);
 		try {
 			checkPermutation();
-			updateNegateAndCheck(f);
+			n = updateNegateAndCheck(f);
 			checkCopy(f);
-			updateNumberOfMatch();
-			updateAndCheckRead(f);
+			nOfMatch = updateNumberOfMatch();
+			r = updateAndCheckRead(f);
 			checkEqual(L1,L2);
 			checkTrueFalse(L2);
 			checkAndUpdateTree();
-			return true ;
+			return new Optimizer(r,n,ws,newOperations,nOfMatch) ;
 		}catch(Exception e) {
-			return false;
+			return null;
 		}
 		
 	}
+	/*
 	public Optimizer copy() {
 		List<FullInstruction> op = new ArrayList<FullInstruction>();
 		BooleanTab[] ws = new BooleanTab[cardinalityLog+1];
 		for(int i=0;i<(cardinalityLog+1);i++) {
-			ws[i]=new BooleanTab(workspace[i].mainValue);
+			ws[i]=new BooleanTab(workspace.get(i).mainValue);
 		}
 		for(FullInstruction el : operations) {
 			op.add(el);
@@ -281,16 +288,17 @@ public class Optimizer {
 		//o.numberOfMatch=numberOfMatch;
 		return o;
 	}
+	*/
 
 	public void printCurrentState() {
 		System.out.print("Current Workspace : \n");
 		for(int i =0;i<cardinalityLog+1;i++) {
 			System.out.print("[");
 			for(int j=0;j<(1<<cardinalityLog)-1;j++) {
-				System.out.print((workspace[i].get(j)?1:0) +" ,");
+				System.out.print((workspace.get(i).get(j)?1:0) +" ,");
 			}
-			System.out.print((workspace[i].get((1<<cardinalityLog)-1)?1:0) +" ]");
-			System.out.print(" " + workspace[i].mainValue +"\n");
+			System.out.print((workspace.get(i).get((1<<cardinalityLog)-1)?1:0) +" ]");
+			System.out.print(" " + workspace.get(i).mainValue +"\n");
 		}
 	}
 	
@@ -298,7 +306,7 @@ public class Optimizer {
 		int[] tab = new int[1<<cardinalityLog];
 		for(int i =0;i<(1<<cardinalityLog);i++) {
 			for(int k=0;k<cardinalityLog;k++) {
-				if(workspace[returnColumns[k]].get(i)) {
+				if(workspace.get(returnColumns[k]).get(i)) {
 					tab[i]+=(1<<k);
 				}
 			}
@@ -306,6 +314,15 @@ public class Optimizer {
 		}
 		return tab;
 	} 
+	
+	public Optimizer applyInstructions(InstructionList l) {
+		Optimizer op = this;
+		while(l!=null && l.node!=null) {
+			op = op.applyInstruction(l.node);
+			l = l.tail;
+		}
+		return op;
+	}
 	
 	public static void main(String[] args){
 		Timestamp ts = Timestamp.from(java.time.Clock.systemUTC().instant());
@@ -325,7 +342,6 @@ public class Optimizer {
 		long diff = ts2.getTime()-ts.getTime();
 		System.out.print("\n Time: "+diff+" ms");
 		Tests.test9();
-		
 		//Tests.testBasics();
 		int[] expected = permutation;// XXX: write here the desired output
 

@@ -21,36 +21,39 @@ class Tests {
 	static int[][] serpent = {s0,s1,s2,s3,s4,s5,s6,s7,invert(s1),invert(s2),invert(s3),invert(s4),invert(s5),invert(s6),invert(s7)};
 	static int[][] permutation_2 = {{0,1,2,3},{1,0}};
 	static int[][] testingSet = {{1,0,3,2,5,4,7,6},{0,1,2,3,4,5,6,7},{0,1,3,2,4,5,7,6},{2,0,1,3,5,6,7,4},{2,0,1,3,5,4,7,6},{2,0,4,3,5,7,1,6},{0,3,1,2},{1,3,0,2},{2,0,1,3}};
-	static List<FullInstruction>[] testingSetSolutions = new List[testingSet.length];
+
 	
 	@Test
 	public static void test1() {
 		List<FullInstruction> expected = new ArrayList<FullInstruction>();
 		expected.add(new FullInstruction(3,0,0));
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {1,0,3,2,5,4,7,6};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	@Test
 	public static void test2() {
 		List<FullInstruction> expected = new ArrayList<FullInstruction>();
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {0,1,2,3,4,5,6,7};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	@Test
 	public static void test3() {
 		List<FullInstruction> expected = new ArrayList<FullInstruction>();
 		expected.add(new FullInstruction(2,0,1));
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {0,1,3,2,4,5,7,6};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	@Test
 	public static void test4() {
@@ -61,11 +64,12 @@ class Tests {
 		expected.add(new FullInstruction(0,0,2));
 		expected.add(new FullInstruction(2,0,1));
 		expected.add(new FullInstruction(3,3,0));
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {2,0,1,3,5,6,7,4};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	@Test
 	public static void test5() {
@@ -77,11 +81,12 @@ class Tests {
 		expected.add(new FullInstruction(2,2,1));
 		expected.add(new FullInstruction(1,1,3));
 		expected.add(new FullInstruction(2,0,1));
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {2,0,1,3,5,4,7,6};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	@Test
 	public static void test6() {
@@ -93,42 +98,46 @@ class Tests {
 		expected.add(new FullInstruction(1,2,1));
 		expected.add(new FullInstruction(2,1,0));
 		expected.add(new FullInstruction(2,2,3));
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {2,0,4,3,5,7,1,6};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	@Test
 	public static void test7() {
 		List<FullInstruction> expected = new ArrayList<FullInstruction>();
 		expected.add(new FullInstruction(2,1,0));
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {0,3,1,2};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	@Test
 	public static void test8() {
 		List<FullInstruction> expected = new ArrayList<FullInstruction>();
 		expected.add(new FullInstruction(3,1,0));
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {1,3,0,2};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	@Test
 	public static void test9() {
 		List<FullInstruction> expected = new ArrayList<FullInstruction>();
 		expected.add(new FullInstruction(2,0,1));
 		expected.add(new FullInstruction(3,0,1));
+		InstructionList expectedInstructionList = InstructionList.fromListInstruction(expected);
 		int[] permutation = {2,0,1,3};
 		OptimizerSolver o = new OptimizerSolver(permutation);
 		Optimizer obtainedOptimizer = o.solve();
-		List<FullInstruction> obtained = obtainedOptimizer.operations;	
-		testInstructionEquality(obtained,expected,permutation);
+		InstructionList obtained = obtainedOptimizer.operations;	
+		testInstructionEquality(obtained,expectedInstructionList,permutation);
 	}
 	
 	@Test
@@ -142,11 +151,9 @@ class Tests {
 				int[] permutation = {a,b,c,d};
 				OptimizerSolver o = new OptimizerSolver(permutation);
 				Optimizer obtainedOptimizer = o.solve();
-				List<FullInstruction> obtained = obtainedOptimizer.operations;	
+				InstructionList obtained = obtainedOptimizer.operations;	
 				Optimizer toTest = new Optimizer(permutation);
-				for(int k =0;k<obtained.size();k++) {
-					toTest.applyInstruction(obtained.get(k));
-				}
+				toTest.applyInstructions(obtained);
 				assertTrue(Arrays.equals(permutation,toTest.getPermutation()),"Permutation " + a + b + c + d + " has failed the test");
 				System.out.print(Arrays.equals(permutation,toTest.getPermutation()));
 			}
@@ -169,17 +176,15 @@ class Tests {
 	}
 	
 	// teste si les deux listes d'instructions sont équivalentes, et si elles donnent bien la bonne permutation
-	private static void testInstructionEquality(List<FullInstruction> instructionListToTest, List<FullInstruction> instructionListStandard, int[] permutation) {
+	private static void testInstructionEquality(InstructionList instructionListToTest, InstructionList instructionListStandard, int[] permutation) {
 		if(instructionListToTest.size()!=instructionListStandard.size()) {
 			assert(false);
 			return;
 		}
 		Optimizer op1 = new Optimizer(permutation);
 		Optimizer op2 = new Optimizer(permutation);
-		for(int i=0; i<instructionListToTest.size();i++) {
-			op1.applyInstruction(instructionListToTest.get(i));
-			op2.applyInstruction(instructionListStandard.get(i));
-		}
+		op1.applyInstructions(instructionListToTest);
+		op2.applyInstructions(instructionListStandard);
 		int[] permResult = op1.getPermutation();
 		assertTrue(Arrays.equals(permResult,permutation), "La permutation n'est pas égal au résultat trouvé après la méthode .solve()\n");
 		assertTrue(Arrays.equals(permResult,op2.getPermutation()),"La permutation n'est pas retrouvée avec la liste d'instruction de réference\n");
