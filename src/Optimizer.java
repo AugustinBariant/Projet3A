@@ -66,6 +66,9 @@ public class Optimizer {
 	}
 	// ApplyInstruction applies the instruction then checks if the instruction is valid in the current state of the workspace.
 	public Optimizer applyInstruction(FullInstruction f) {
+		if(f==null) {
+			return null;
+		}
 		int L1 = workspace.get(f.column1).mainValue;
 		WorkspaceList newWorkSpace;
 		InstructionList newOperations;
@@ -262,7 +265,7 @@ public class Optimizer {
 			r = updateAndCheckRead(f);
 			checkEqual(L1,L2);
 			checkTrueFalse(L2);
-			checkAndUpdateTree(ws);
+			//checkAndUpdateTree(ws);
 			return new Optimizer(r,n,ws,newOperations,nOfMatch) ;
 		}catch(Exception e) {
 			return null;
@@ -331,18 +334,19 @@ public class Optimizer {
 		int[] s1 = {15, 12, 2, 7, 9, 0, 5, 10, 1, 11, 14, 8, 6, 13, 3, 4};
 		int[] cardinality = {2,0,4,3,5,7,1,6};
 		//int[] permutation3 ={0,1,9,2,5,4,7,6,3,8,11,10,13,12,15,14};
-		
-		OptimizerSolver o = new OptimizerSolver(s2); // XXX: bogus object creation
+		/*
+		OptimizerSolver o = new OptimizerSolver(cardinality); // XXX: bogus object creation
 		Optimizer obtainedOptimizer = o.solve();
 		int[] obtained = obtainedOptimizer.getPermutation();
+		*/
 		
-		/*
 		Timestamp ts2 = Timestamp.from(java.time.Clock.systemUTC().instant());
+		
+		//Tests.test4x4Permutation();
+		Tests.test5();
 		long diff = ts2.getTime()-ts.getTime();
 		System.out.print("\n Time: "+diff+" ms");
-		Tests.test4x4Permutation();
-		//Tests.testBasics();
-		 */
+		 
 		int[] expected = permutation;// XXX: write here the desired output
 
 	}

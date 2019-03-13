@@ -32,7 +32,7 @@ public class OptimizerSolver {
 			InstructionCycle cycle = new InstructionCycle(cardinalityLog);
 			FullInstruction i = cycle.updateNewInstruction();
 			//o.PrintCurrentState();
-			while(!i.isEnd) {
+			while(i!=null) {
 				//System.out.print("\n hi " + o.workspace.get(0).mainValue);
 				
 				Optimizer save = o.applyInstruction(i);

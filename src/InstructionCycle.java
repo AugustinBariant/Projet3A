@@ -6,11 +6,13 @@ public class InstructionCycle {
 	private int k;
 	private boolean isFirstTry;
 	private int cardinalityLog;
+	private boolean hasNext;
 	InstructionCycle(int cardLog){
 		i=0;
 		j=0;
 		k=0;
 		isFirstTry=false;
+		hasNext = true;
 		cardinalityLog = cardLog;
 	}
 	private FullInstruction newInstruction() {
@@ -24,7 +26,8 @@ public class InstructionCycle {
 			return newInstruction();
 		}
 		if(k==cardinalityLog && j==cardinalityLog && i==4) {
-			return new FullInstruction(true);
+			hasNext = false;
+			return null;
 		}
 		if(k!=cardinalityLog) {
 			k+=1;
@@ -39,6 +42,9 @@ public class InstructionCycle {
 			}
 		}
 		return newInstruction();
+	}
+	public boolean hasNext() {
+		return hasNext;
 	}
 	
 }
