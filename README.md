@@ -1,46 +1,56 @@
 # Projet3A
 # Augustin Bariant
+# Pr√©sentation du projet
 
-Le projet est constituÈ de 5 classes:
+Ce projet a pour objectif d'augmenter la vitesse de calcul des S-box de l'algorithme Serpent [1], finaliste √† la comp√©tition de l'Advanced Encryption Standard (AES) en 1997. Les S-box sont des permutations de quatre bits, que l'on essaie de factoriser en op√©rations processeur seulement, sur cinq registres. L'implementation est inspir√©e du papier "Speeding Up Serpent" [2], de Osvik, et est cod√©e en java.
 
--La classe Optimizer: c'est la classe de base sur laquelle on travaille. Chaque instance correspond ‡ une configuration, la permutation donnÈe en argument Ètant statique.
+# Bibliographie
 
--La classe Instruction: cette classe a pour but d'ÈnumÈrer les 5 instructions possibles, et de les linker ‡ une id.
+1. "Serpent: A Proposal for the Advanced Encryption Standard", Ross Anderson, Eli Biham and Lars Knudsen, 1997, https://www.cl.cam.ac.uk/~rja14/Papers/serpent.pdf
+2. "Speeding Up Serpent", Dag Arne Osvik, 2000, https://www.ii.uib.no/~osvik/pub/aes3.pdf
 
--La classe FullInstruction: cette classe a un attribut Instruction, et complËte l'instruction avec des attributs correspondants aux colonnes sur laquelle l'instruction doit agir.
+# Structure du projet
 
--La classe InstructionCycle: cette classe produit des FullInstructions cycliques afin de les appliquer ‡ une configuration (instance de Optimizer).
+Le projet est constitu√© de 5 classes:
 
--La classe WorkspaceComparator: cette classe compare deux configurations pour tester leur Èquivalence.
+-La classe Optimizer: c'est la classe de base sur laquelle on travaille. Chaque instance correspond √† une configuration, la permutation donn√©e en argument √©tant statique.
+
+-La classe Instruction: cette classe a pour but d'√©num√©rer les 5 instructions possibles, et de les linker √† une id.
+
+-La classe FullInstruction: cette classe a un attribut Instruction, et compl√®te l'instruction avec des attributs correspondants aux colonnes sur laquelle l'instruction doit agir.
+
+-La classe InstructionCycle: cette classe produit des FullInstructions cycliques afin de les appliquer √† une configuration (instance de Optimizer).
+
+-La classe WorkspaceComparator: cette classe compare deux configurations pour tester leur √©quivalence.
 
 -------------------------------------------
 La classe Optimizer:
 
-La principale mÈthode est
+La principale m√©thode est
 
 	-public boolean ApplyInstruction(FullInstruction f):
 
-On peut appliquer des instructions ‡ une configuration: Cela modifie l'instance, et teste si la configuration rÈsultante doit Ítre gardÈe ou doit Ítre jetÈe parce qu'elle ne satisfait pas certaines conditions.
+On peut appliquer des instructions √† une configuration: Cela modifie l'instance, et teste si la configuration r√©sultante doit √™tre gard√©e ou doit √™tre jet√©e parce qu'elle ne satisfait pas certaines conditions.
 
 Cest tests sont produits avec la fonction 
 
 	-public boolean Check(FullInstruction f, boolean[] L1, boolean[] L2)
 
-Ce check lance toutes les fonctions qui vÈrifient chaque condition:
+Ce check lance toutes les fonctions qui v√©rifient chaque condition:
 
-	-CheckPermutation() qui vÈrifie si deux colonnes ne sont pas Ègales,
-	-UpdateNegateAndCheck(f) qui vÈrifie si l'instruction est Not et que la colonne affectÈe est marquÈe par le marqueur Neg. Si tout va bien, cette fonction update le tableau Neg,
-	-CheckCopy(f) qui vÈrifie si l'instruction est difÈrente de Mov et que la colonne modifiÈe est la copie d'une autre colonne,
-	-UpdateNumberOfMatch() qui vÈrifie si le nombre de lignes qui correspondent ‡ la permutation finale augmente, si ce nombre diminue, le check ne passe pas. De plus, cette fonction update le nombre de matchs,
-	-UpdateAndCheckRead(f) qui checke si on a mov vers une ligne non dÈj‡ lue,
-	-CheckTrueFalse(L2) qui checke si une ligne est toute vraie ou toute fausse, et l'invalide le cas ÈchÈant.
-	-CheckAndUpdateTree() qui checke si une configuration a dÈj‡ ÈtÈ trouvÈe (grace ‡ un attribut statique qui contient un treeSet de WorkspaceComparator);
+	-CheckPermutation() qui v√©rifie si deux colonnes ne sont pas √©gales,
+	-UpdateNegateAndCheck(f) qui v√©rifie si l'instruction est Not et que la colonne affect√©e est marqu√©e par le marqueur Neg. Si tout va bien, cette fonction update le tableau Neg,
+	-CheckCopy(f) qui v√©rifie si l'instruction est dif√©rente de Mov et que la colonne modifi√©e est la copie d'une autre colonne,
+	-UpdateNumberOfMatch() qui v√©rifie si le nombre de lignes qui correspondent √† la permutation finale augmente, si ce nombre diminue, le check ne passe pas. De plus, cette fonction update le nombre de matchs,
+	-UpdateAndCheckRead(f) qui checke si on a mov vers une ligne non d√©j√† lue,
+	-CheckTrueFalse(L2) qui checke si une ligne est toute vraie ou toute fausse, et l'invalide le cas √©ch√©ant.
+	-CheckAndUpdateTree() qui checke si une configuration a d√©j√† √©t√© trouv√©e (grace √† un attribut statique qui contient un treeSet de WorkspaceComparator);
 
 ---------------------------------------------
 La fonction main de Optimizer:
 
-On crÈe une liste avec plein d'instances d'Optimizer. On applique toutes les instructions possibles gr‚ce ‡ InstructionCycle, puis on ajoute toutes les configuration valides dans la liste.
-Tant que le nombre de lignes correspondantes ‡ la permutation cible n'est pas Ègal ‡ 4, on continue.
+On cr√©e une liste avec plein d'instances d'Optimizer. On applique toutes les instructions possibles gr√¢ce √† InstructionCycle, puis on ajoute toutes les configuration valides dans la liste.
+Tant que le nombre de lignes correspondantes √† la permutation cible n'est pas √©gal √† 4, on continue.
 
 
 ----------------------------------------------
